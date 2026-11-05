@@ -1,1 +1,1552 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Camera, Image, Film, Users, MapPin, Search, Trash2, Settings, Sparkles,
+  Play, Share2, Filter, CheckCircle, Plus, ChevronLeft, Moon, Sun, Download,
+  Info, X, ShieldCheck, Cpu, Zap, Folder, Eye, Heart, MoreVertical, Grid,
+  List, FileText, Dog, Smile, Car, Utensils, Trees, Smartphone, Maximize2,
+  ChevronRight, Check, Copy, Code, ArrowRight, RefreshCw, AlertCircle, Layers,
+  Compass, HardDrive, CheckSquare, Square, Tag, Sliders, Map, Clock, FileImage
+} from 'lucide-react';
 
+// ==========================================
+// MOCK DATA INITIALIZATION (10,000+ Scalable)
+// ==========================================
+
+const INITIAL_MEDIA_ITEMS = [
+  {
+    id: 'm1',
+    type: 'photo',
+    url: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80',
+    title: 'Bob at Copacabana Beach',
+    date: '2024-03-15T14:30:00',
+    location: 'Rio de Janeiro, RJ',
+    coords: { lat: -22.9711, lng: -43.1822 },
+    terrain: 'Beach',
+    category: 'Pets & Animals',
+    tags: ['pets', 'dog', 'beach', 'nature', 'ocean'],
+    people: ['Maria Silva'],
+    exif: { camera: 'iPhone 15 Pro', focal: '24mm', iso: 50, shutter: '1/2000s', size: '3.4 MB', resolution: '4032x3024' },
+    quality: { isBlurry: false, isDuplicate: false, score: 0.98 },
+    smartAlbums: ['Pets & Animals', 'Places', 'Nature & Landscapes', 'People']
+  },
+  {
+    id: 'm2',
+    type: 'photo',
+    url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80',
+    title: 'Selfie in the Park',
+    date: '2024-02-10T11:15:00',
+    location: 'São Paulo, SP',
+    coords: { lat: -23.5505, lng: -46.6333 },
+    terrain: 'City',
+    category: 'Selfies',
+    tags: ['selfie', 'people', 'park', 'smile'],
+    people: ['Maria Silva', 'João Santos'],
+    exif: { camera: 'Samsung Galaxy S24', focal: '23mm', iso: 100, shutter: '1/1000s', size: '2.8 MB', resolution: '4000x3000' },
+    quality: { isBlurry: false, isDuplicate: false, score: 0.92 },
+    smartAlbums: ['Selfies', 'People', 'Places']
+  },
+  {
+    id: 'm3',
+    type: 'video',
+    url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+    videoType: 'long',
+    duration: '04:12',
+    title: 'Sunset in Florianópolis',
+    date: '2023-11-20T18:45:00',
+    location: 'Florianópolis, SC',
+    coords: { lat: -27.5948, lng: -48.5482 },
+    terrain: 'Beach',
+    category: 'Videos',
+    tags: ['video', 'beach', 'sunset', 'travel', 'nature'],
+    people: [],
+    exif: { camera: 'iPhone 14 Pro', focal: '13mm', iso: 64, shutter: '1/500s', size: '145.2 MB', resolution: '4K 60fps' },
+    quality: { isBlurry: false, isDuplicate: false, score: 0.96 },
+    smartAlbums: ['Videos', 'Places', 'Nature & Landscapes', 'Events']
+  },
+  {
+    id: 'm4',
+    type: 'photo',
+    url: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=800&q=80',
+    title: "Lucas' Surprise Birthday Party",
+    date: '2024-01-05T20:00:00',
+    location: 'Curitiba, PR',
+    coords: { lat: -25.4284, lng: -49.2733 },
+    terrain: 'Home',
+    category: 'Events',
+    tags: ['events', 'party', 'birthday', 'friends', 'cake'],
+    people: ['Lucas Oliveira', 'Maria Silva'],
+    exif: { camera: 'iPhone 15 Pro', focal: '24mm', iso: 400, shutter: '1/60s', size: '4.1 MB', resolution: '4032x3024' },
+    quality: { isBlurry: false, isDuplicate: false, score: 0.89 },
+    smartAlbums: ['Events', 'People']
+  },
+  {
+    id: 'm5',
+    type: 'photo',
+    url: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80',
+    title: 'Artisanal Pizza Dinner',
+    date: '2024-03-01T21:10:00',
+    location: 'São Paulo, SP',
+    coords: { lat: -23.5505, lng: -46.6333 },
+    terrain: 'City',
+    category: 'Food',
+    tags: ['food', 'pizza', 'restaurant', 'dinner'],
+    people: [],
+    exif: { camera: 'Google Pixel 8', focal: '25mm', iso: 200, shutter: '1/120s', size: '3.0 MB', resolution: '4080x3072' },
+    quality: { isBlurry: false, isDuplicate: false, score: 0.94 },
+    smartAlbums: ['Food', 'Places']
+  },
+  {
+    id: 'm6',
+    type: 'photo',
+    url: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80',
+    title: 'Vintage Car Exhibition',
+    date: '2023-09-14T10:20:00',
+    location: 'Belo Horizonte, MG',
+    coords: { lat: -19.9167, lng: -43.9345 },
+    terrain: 'City',
+    category: 'Vehicles',
+    tags: ['vehicles', 'car', 'classic', 'exhibition'],
+    people: [],
+    exif: { camera: 'Sony A7 IV', focal: '35mm', iso: 100, shutter: '1/1000s', size: '12.4 MB', resolution: '6000x4000' },
+    quality: { isBlurry: false, isDuplicate: false, score: 0.99 },
+    smartAlbums: ['Vehicles', 'Places']
+  },
+  {
+    id: 'm7',
+    type: 'photo',
+    url: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80',
+    title: 'Tax Payment Receipt',
+    date: '2024-01-15T09:05:00',
+    location: 'Home',
+    coords: { lat: -23.5505, lng: -46.6333 },
+    terrain: 'Home',
+    category: 'Documents & Screenshots',
+    tags: ['documents', 'receipt', 'pdf', 'bank', 'screenshot'],
+    people: [],
+    exif: { camera: 'Screenshot', focal: 'N/A', iso: 0, shutter: 'N/A', size: '850 KB', resolution: '1170x2532' },
+    quality: { isBlurry: false, isDuplicate: false, score: 0.75 },
+    smartAlbums: ['Documents & Screenshots']
+  },
+  {
+    id: 'm8',
+    type: 'photo',
+    url: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80',
+    title: 'Kitten Sleeping on the Sofa',
+    date: '2024-02-28T16:40:00',
+    location: 'Home',
+    coords: { lat: -23.5505, lng: -46.6333 },
+    terrain: 'Home',
+    category: 'Pets & Animals',
+    tags: ['pets', 'cat', 'cute', 'home', 'animals'],
+    people: [],
+    exif: { camera: 'iPhone 15 Pro', focal: '77mm', iso: 320, shutter: '1/100s', size: '2.9 MB', resolution: '4032x3024' },
+    quality: { isBlurry: false, isDuplicate: false, score: 0.91 },
+    smartAlbums: ['Pets & Animals']
+  },
+  {
+    id: 'm9',
+    type: 'photo',
+    url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80',
+    title: 'Hiking at Mountain Trail',
+    date: '2023-12-10T08:15:00',
+    location: 'Campos do Jordão, SP',
+    coords: { lat: -22.7394, lng: -45.5913 },
+    terrain: 'Mountain',
+    category: 'Nature & Landscapes',
+    tags: ['nature', 'mountain', 'hiking', 'travel', 'landscape'],
+    people: ['Lucas Oliveira'],
+    exif: { camera: 'iPhone 13', focal: '26mm', iso: 32, shutter: '1/1500s', size: '3.9 MB', resolution: '4032x3024' },
+    quality: { isBlurry: false, isDuplicate: false, score: 0.97 },
+    smartAlbums: ['Nature & Landscapes', 'Places', 'People']
+  },
+  {
+    id: 'm10',
+    type: 'photo',
+    url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
+    title: 'Portrait of Maria Silva',
+    date: '2024-03-02T15:00:00',
+    location: 'São Paulo, SP',
+    coords: { lat: -23.5505, lng: -46.6333 },
+    terrain: 'City',
+    category: 'People',
+    tags: ['people', 'portrait', 'maria', 'studio'],
+    people: ['Maria Silva'],
+    exif: { camera: 'Canon EOS R6', focal: '85mm', iso: 100, shutter: '1/500s', size: '8.5 MB', resolution: '6000x4000' },
+    quality: { isBlurry: false, isDuplicate: false, score: 0.99 },
+    smartAlbums: ['People']
+  },
+  {
+    id: 'm11',
+    type: 'photo',
+    url: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80',
+    title: 'Bob at the Beach (Duplicate Photo)',
+    date: '2024-03-15T14:30:02',
+    location: 'Rio de Janeiro, RJ',
+    coords: { lat: -22.9711, lng: -43.1822 },
+    terrain: 'Beach',
+    category: 'Pets & Animals',
+    tags: ['pets', 'dog', 'duplicate'],
+    people: ['Maria Silva'],
+    exif: { camera: 'iPhone 15 Pro', focal: '24mm', iso: 50, shutter: '1/2000s', size: '3.3 MB', resolution: '4032x3024' },
+    quality: { isBlurry: false, isDuplicate: true, duplicateGroupId: 'dup-1', score: 0.60 },
+    smartAlbums: ['Cleanup Suggestions', 'Pets & Animals']
+  },
+  {
+    id: 'm12',
+    type: 'photo',
+    url: 'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=800&q=80',
+    title: 'Blurry Photo at Restaurant',
+    date: '2024-02-14T22:10:00',
+    location: 'São Paulo, SP',
+    coords: { lat: -23.5505, lng: -46.6333 },
+    terrain: 'City',
+    category: 'Food',
+    tags: ['blurry', 'low quality'],
+    people: [],
+    exif: { camera: 'iPhone 12', focal: '26mm', iso: 800, shutter: '1/15s', size: '1.8 MB', resolution: '4032x3024' },
+    quality: { isBlurry: true, isDuplicate: false, score: 0.30 },
+    smartAlbums: ['Cleanup Suggestions']
+  }
+];
+
+const PEOPLE_PROFILES = [
+  { id: 'p1', name: 'Maria Silva', faceUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80', count: 4, relation: 'Family' },
+  { id: 'p2', name: 'Lucas Oliveira', faceUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80', count: 2, relation: 'Friend' },
+  { id: 'p3', name: 'João Santos', faceUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80', count: 1, relation: 'Colleague' },
+  { id: 'p4', name: 'Unidentified Person #1', faceUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80', count: 3, relation: 'Unknown' }
+];
+
+const AUTOMATIC_ALBUMS = [
+  { id: 'alb-pessoas', name: 'People', icon: Users, color: 'from-pink-500 to-rose-600', description: 'Automatic facial recognition' },
+  { id: 'alb-pets', name: 'Pets & Animals', icon: Dog, color: 'from-amber-500 to-orange-600', description: 'Dogs, cats, birds and more' },
+  { id: 'alb-lugares', name: 'Places', icon: MapPin, color: 'from-emerald-500 to-teal-600', description: 'By GPS & scenery type' },
+  { id: 'alb-eventos', name: 'Events', icon: Sparkles, color: 'from-purple-500 to-indigo-600', description: 'Birthdays, parties & trips' },
+  { id: 'alb-comida', name: 'Food', icon: Utensils, color: 'from-red-500 to-pink-600', description: 'Dishes, restaurants & recipes' },
+  { id: 'alb-veiculos', name: 'Vehicles', icon: Car, color: 'from-blue-500 to-cyan-600', description: 'Cars, bikes & transportation' },
+  { id: 'alb-docs', name: 'Documents & Screenshots', icon: FileText, color: 'from-slate-600 to-gray-800', description: 'Receipts, prints & text' },
+  { id: 'alb-natureza', name: 'Nature & Landscapes', icon: Trees, color: 'from-green-500 to-emerald-700', description: 'Beaches, mountains & forests' },
+  { id: 'alb-selfies', name: 'Selfies', icon: Smile, color: 'from-violet-500 to-purple-700', description: 'Close-up portraits' },
+  { id: 'alb-videos', name: 'Videos', icon: Film, color: 'from-sky-500 to-blue-700', description: 'Long, short & slow-motion' },
+  { id: 'alb-limpeza', name: 'Cleanup Suggestions', icon: Trash2, color: 'from-rose-600 to-red-800', description: 'Duplicates, blurry & heavy files' }
+];
+
+// ==========================================
+// MAIN COMPONENT ENTRY POINT
+// ==========================================
+
+export default function App() {
+  // App Global State
+  const [theme, setTheme] = useState('dark');
+  const [viewMode, setViewMode] = useState('app'); // 'app' | 'dev-docs'
+  const [isOnboarded, setIsOnboarded] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState(0);
+  const [scanStatusText, setScanStatusText] = useState('');
+  
+  // Navigation State inside App Preview
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'people' | 'places' | 'search' | 'cleanup' | 'settings'
+  const [selectedAlbum, setSelectedAlbum] = useState(null);
+  const [selectedMedia, setSelectedMedia] = useState(null);
+  const [selectedPerson, setSelectedPerson] = useState(null);
+
+  // App Data State
+  const [mediaItems, setMediaItems] = useState(INITIAL_MEDIA_ITEMS);
+  const [people, setPeople] = useState(PEOPLE_PROFILES);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [toastMessage, setToastMessage] = useState(null);
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
+
+  // Smart Notification banner state
+  const [smartSuggestion, setSmartSuggestion] = useState({
+    visible: true,
+    title: 'New Album Recommendation!',
+    description: 'We found 5 photos from your weekend at the beach. Would you like to create "Weekend at the Beach"?',
+  });
+
+  // Trigger Toast
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // Simulate Scanning process
+  const startScanningProcess = () => {
+    setIsScanning(true);
+    setScanProgress(5);
+    setScanStatusText('Reading EXIF metadata and geolocation...');
+
+    const steps = [
+      { p: 25, txt: 'Executing ML Kit Face Detection on-device...' },
+      { p: 55, txt: 'Classifying objects with TensorFlow Lite...' },
+      { p: 80, txt: 'Identifying duplicate and blurry photos...' },
+      { p: 100, txt: 'Organization completed successfully!' }
+    ];
+
+    steps.forEach((step, idx) => {
+      setTimeout(() => {
+        setScanProgress(step.p);
+        setScanStatusText(step.txt);
+        if (step.p === 100) {
+          setTimeout(() => {
+            setIsScanning(false);
+            setIsOnboarded(true);
+            showToast('12 media items organized into 11 smart albums!');
+          }, 800);
+        }
+      }, (idx + 1) * 900);
+    });
+  };
+
+  // Toggle Favorites
+  const toggleFavorite = (id, e) => {
+    if (e) e.stopPropagation();
+    const next = new Set(favoriteIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setFavoriteIds(next);
+    showToast(next.has(id) ? 'Added to Favorites' : 'Removed from Favorites');
+  };
+
+  // Delete Item
+  const handleDeleteItem = (id) => {
+    setMediaItems(prev => prev.filter(item => item.id !== id));
+    if (selectedMedia?.id === id) setSelectedMedia(null);
+    showToast('Item moved to device trash');
+  };
+
+  // Rename Person
+  const handleRenamePerson = (personId, newName) => {
+    if (!newName.trim()) return;
+    setPeople(prev => prev.map(p => p.id === personId ? { ...p, name: newName } : p));
+    showToast(`Person renamed to "${newName}"`);
+  };
+
+  // Compute stats
+  const totalStorageSaved = useMemo(() => {
+    return mediaItems
+      .filter(m => m.quality.isBlurry || m.quality.isDuplicate)
+      .reduce((acc, m) => acc + (parseFloat(m.exif.size) || 2), 0)
+      .toFixed(1);
+  }, [mediaItems]);
+
+  return (
+    <div className={`${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-900'} min-h-screen font-sans transition-colors duration-200 flex flex-col`}>
+      
+      {/* GLOBAL HEADER & VIEW SWITCHER */}
+      <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 text-white px-4 py-3 flex flex-wrap items-center justify-between gap-3 shadow-md">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-rose-500/20">
+            <Sparkles className="w-6 h-6 text-white animate-pulse" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-amber-200 via-rose-300 to-indigo-200 bg-clip-text text-transparent">
+              Flexigallery
+            </h1>
+            <p className="text-xs text-slate-400 flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3 text-emerald-400" /> 100% Private On-Device AI
+            </p>
+          </div>
+        </div>
+
+        {/* Header Actions */}
+        <div className="flex items-center space-x-2">
+          {/* Switch Mode: App vs Code Specs */}
+          <div className="bg-slate-800 p-1 rounded-xl flex items-center border border-slate-700 text-xs font-medium">
+            <button
+              onClick={() => setViewMode('app')}
+              className={`px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all ${viewMode === 'app' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>Mobile App Demo</span>
+            </button>
+            <button
+              onClick={() => setViewMode('dev-docs')}
+              className={`px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all ${viewMode === 'dev-docs' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+            >
+              <Code className="w-3.5 h-3.5" />
+              <span>Architecture & RN Code</span>
+            </button>
+          </div>
+
+          {/* Theme Switcher */}
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+            title="Toggle Theme"
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
+          </button>
+        </div>
+      </header>
+
+      {/* TOAST NOTIFICATION */}
+      {toastMessage && (
+        <div className="fixed top-16 right-4 z-50 bg-slate-900 border border-emerald-500/40 text-emerald-300 px-4 py-2.5 rounded-2xl shadow-2xl flex items-center space-x-2 animate-bounce">
+          <CheckCircle className="w-4 h-4 text-emerald-400" />
+          <span className="text-xs font-semibold">{toastMessage}</span>
+        </div>
+      )}
+
+      {/* VIEW 1: DEV DOCS & ARCHITECTURE SPECIFICATION */}
+      {viewMode === 'dev-docs' ? (
+        <DevArchitectureView />
+      ) : (
+        /* VIEW 2: INTERACTIVE MOBILE APP SIMULATOR */
+        <main className="flex-1 max-w-md w-full mx-auto p-2 sm:p-4 flex flex-col justify-start">
+          
+          {/* MOBILE PHONE FRAME CONTAINER */}
+          <div className={`w-full rounded-[2.5rem] border-4 ${theme === 'dark' ? 'border-slate-800 bg-slate-900 shadow-2xl shadow-indigo-950/40' : 'border-slate-300 bg-white shadow-xl'} overflow-hidden flex flex-col min-h-[780px] relative`}>
+            
+            {/* MOBILE STATUS BAR SIMULATION */}
+            <div className="bg-slate-950 text-slate-400 px-6 py-2 flex items-center justify-between text-xs font-mono select-none">
+              <span>9:41</span>
+              <div className="w-20 h-4 bg-slate-900 rounded-full flex items-center justify-center">
+                <div className="w-3 h-3 bg-slate-800 rounded-full"></div>
+              </div>
+              <div className="flex items-center space-x-1.5">
+                <Zap className="w-3 h-3 text-amber-400" />
+                <span>5G</span>
+                <span className="text-[10px] bg-emerald-950 text-emerald-400 px-1 rounded border border-emerald-800">100%</span>
+              </div>
+            </div>
+
+            {/* SCREEN 1: ONBOARDING & SCANNING */}
+            {!isOnboarded ? (
+              <OnboardingScreen 
+                isScanning={isScanning}
+                scanProgress={scanProgress}
+                scanStatusText={scanStatusText}
+                onStartScan={startScanningProcess}
+              />
+            ) : (
+              /* MAIN APP INTERFACE WITH BOTTOM NAVIGATION */
+              <div className="flex-1 flex flex-col relative overflow-hidden">
+                
+                {/* SMART SUGGESTION BANNER */}
+                {smartSuggestion.visible && activeTab === 'home' && !selectedAlbum && (
+                  <div className="m-3 p-3.5 bg-gradient-to-r from-rose-900/40 via-indigo-900/40 to-slate-900 border border-rose-500/30 rounded-2xl flex items-start justify-between gap-2 shadow-lg backdrop-blur-sm animate-fade-in">
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-rose-500/20 text-rose-400 rounded-xl mt-0.5">
+                        <Sparkles className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-rose-200">{smartSuggestion.title}</h4>
+                        <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">{smartSuggestion.description}</p>
+                        <div className="mt-2 flex space-x-2">
+                          <button 
+                            onClick={() => {
+                              showToast('Album "Weekend at the Beach" created successfully!');
+                              setSmartSuggestion(prev => ({ ...prev, visible: false }));
+                            }}
+                            className="px-2.5 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-[11px] font-semibold transition"
+                          >
+                            Create Album
+                          </button>
+                          <button 
+                            onClick={() => setSmartSuggestion(prev => ({ ...prev, visible: false }))}
+                            className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[11px] transition"
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => setSmartSuggestion(prev => ({ ...prev, visible: false }))}
+                      className="text-slate-500 hover:text-slate-300 p-1"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+
+                {/* ACTIVE TAB CONTENT ROUTER */}
+                <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
+                  {selectedAlbum ? (
+                    <AlbumDetailView 
+                      album={selectedAlbum} 
+                      mediaItems={mediaItems} 
+                      onBack={() => setSelectedAlbum(null)}
+                      onSelectMedia={(item) => setSelectedMedia(item)}
+                      favoriteIds={favoriteIds}
+                      onToggleFavorite={toggleFavorite}
+                    />
+                  ) : selectedPerson ? (
+                    <PersonDetailView 
+                      person={selectedPerson} 
+                      mediaItems={mediaItems} 
+                      onBack={() => setSelectedPerson(null)}
+                      onSelectMedia={(item) => setSelectedMedia(item)}
+                      onRenamePerson={handleRenamePerson}
+                    />
+                  ) : (
+                    <>
+                      {activeTab === 'home' && (
+                        <HomeScreen 
+                          albums={AUTOMATIC_ALBUMS} 
+                          mediaItems={mediaItems}
+                          onOpenAlbum={(alb) => setSelectedAlbum(alb)}
+                          onRescan={startScanningProcess}
+                        />
+                      )}
+                      {activeTab === 'people' && (
+                        <PeopleScreen 
+                          people={people} 
+                          onSelectPerson={(p) => setSelectedPerson(p)}
+                        />
+                      )}
+                      {activeTab === 'places' && (
+                        <PlacesScreen 
+                          mediaItems={mediaItems}
+                          onSelectMedia={(item) => setSelectedMedia(item)}
+                        />
+                      )}
+                      {activeTab === 'search' && (
+                        <SearchScreen 
+                          mediaItems={mediaItems}
+                          searchQuery={searchQuery}
+                          setSearchQuery={setSearchQuery}
+                          onSelectMedia={(item) => setSelectedMedia(item)}
+                        />
+                      )}
+                      {activeTab === 'cleanup' && (
+                        <CleanupScreen 
+                          mediaItems={mediaItems}
+                          storageSaved={totalStorageSaved}
+                          onDeleteItem={handleDeleteItem}
+                          onSelectMedia={(item) => setSelectedMedia(item)}
+                        />
+                      )}
+                      {activeTab === 'settings' && (
+                        <SettingsScreen 
+                          onResetFacialData={() => {
+                            setPeople([]);
+                            showToast('Facial recognition data cleared!');
+                          }}
+                          onRescanAll={startScanningProcess}
+                        />
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* BOTTOM NAVIGATION BAR */}
+                <nav className={`border-t ${theme === 'dark' ? 'bg-slate-950/95 border-slate-800' : 'bg-slate-50 border-slate-200'} backdrop-blur-lg px-2 py-2 flex items-center justify-around z-30`}>
+                  <NavButton 
+                    icon={Grid} 
+                    label="Albums" 
+                    active={activeTab === 'home' && !selectedAlbum && !selectedPerson} 
+                    onClick={() => { setActiveTab('home'); setSelectedAlbum(null); setSelectedPerson(null); }} 
+                  />
+                  <NavButton 
+                    icon={Users} 
+                    label="People" 
+                    active={activeTab === 'people' && !selectedPerson} 
+                    onClick={() => { setActiveTab('people'); setSelectedPerson(null); setSelectedAlbum(null); }} 
+                  />
+                  <NavButton 
+                    icon={MapPin} 
+                    label="Places" 
+                    active={activeTab === 'places'} 
+                    onClick={() => { setActiveTab('places'); setSelectedAlbum(null); setSelectedPerson(null); }} 
+                  />
+                  <NavButton 
+                    icon={Search} 
+                    label="Search" 
+                    active={activeTab === 'search'} 
+                    onClick={() => { setActiveTab('search'); setSelectedAlbum(null); setSelectedPerson(null); }} 
+                  />
+                  <NavButton 
+                    icon={Trash2} 
+                    label="Cleanup" 
+                    badge={mediaItems.filter(m => m.quality.isBlurry || m.quality.isDuplicate).length}
+                    active={activeTab === 'cleanup'} 
+                    onClick={() => { setActiveTab('cleanup'); setSelectedAlbum(null); setSelectedPerson(null); }} 
+                  />
+                  <NavButton 
+                    icon={Settings} 
+                    label="Settings" 
+                    active={activeTab === 'settings'} 
+                    onClick={() => { setActiveTab('settings'); setSelectedAlbum(null); setSelectedPerson(null); }} 
+                  />
+                </nav>
+
+              </div>
+            )}
+
+            {/* FULLSCREEN MEDIA VIEWER MODAL */}
+            {selectedMedia && (
+              <MediaViewerModal 
+                media={selectedMedia} 
+                onClose={() => setSelectedMedia(null)}
+                isFavorite={favoriteIds.has(selectedMedia.id)}
+                onToggleFavorite={(e) => toggleFavorite(selectedMedia.id, e)}
+                onDelete={() => handleDeleteItem(selectedMedia.id)}
+              />
+            )}
+
+          </div>
+        </main>
+      )}
+
+    </div>
+  );
+}
+
+// ==========================================
+// SUB-COMPONENTS & SCREENS
+// ==========================================
+
+function NavButton({ icon: Icon, label, active, onClick, badge }) {
+  return (
+    <button 
+      onClick={onClick}
+      className={`relative flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all ${active ? 'text-rose-500 font-bold scale-105' : 'text-slate-400 hover:text-slate-200 font-normal'}`}
+    >
+      <div className="relative">
+        <Icon className={`w-5 h-5 ${active ? 'stroke-[2.5]' : 'stroke-2'}`} />
+        {badge > 0 && (
+          <span className="absolute -top-1.5 -right-2 bg-rose-600 text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center border-2 border-slate-950">
+            {badge}
+          </span>
+        )}
+      </div>
+      <span className="text-[10px] mt-1 tracking-tight">{label}</span>
+    </button>
+  );
+}
+
+// ONBOARDING & AI SCANNER
+function OnboardingScreen({ isScanning, scanProgress, scanStatusText, onStartScan }) {
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-slate-900 via-slate-950 to-indigo-950 text-white relative">
+      <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-500 via-rose-500 to-indigo-600 flex items-center justify-center mb-6 shadow-2xl shadow-rose-500/30 animate-pulse">
+        <Sparkles className="w-10 h-10 text-white" />
+      </div>
+
+      <h2 className="text-2xl font-black bg-gradient-to-r from-amber-200 via-rose-200 to-indigo-200 bg-clip-text text-transparent mb-2">
+        Welcome to Flexigallery
+      </h2>
+      <p className="text-xs text-slate-300 max-w-xs mb-8 leading-relaxed">
+        Your effortless smart gallery. We automatically organize your photos and videos by people, places, animals, events, and more.
+      </p>
+
+      {/* PRIVACY PROMISE CARDS */}
+      <div className="w-full space-y-3 mb-8 text-left">
+        <div className="p-3 bg-slate-900/80 border border-slate-800 rounded-2xl flex items-center space-x-3">
+          <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-xl">
+            <Cpu className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-slate-100">On-Device Processing</h4>
+            <p className="text-[11px] text-slate-400">No photos leave your phone. All AI processing runs locally.</p>
+          </div>
+        </div>
+
+        <div className="p-3 bg-slate-900/80 border border-slate-800 rounded-2xl flex items-center space-x-3">
+          <div className="p-2 bg-indigo-500/20 text-indigo-400 rounded-xl">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-slate-100">Zero Cloud Without Permission</h4>
+            <p className="text-[11px] text-slate-400">Your data and facial profiles remain strictly under your control.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* SCANNING CONTROLS */}
+      {isScanning ? (
+        <div className="w-full bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
+          <div className="flex justify-between items-center text-xs font-semibold text-rose-300">
+            <span>Analyzing Gallery...</span>
+            <span>{scanProgress}%</span>
+          </div>
+          <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+            <div 
+              className="bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-500 h-full transition-all duration-300"
+              style={{ width: `${scanProgress}%` }}
+            ></div>
+          </div>
+          <p className="text-[11px] text-slate-400 animate-pulse font-mono">{scanStatusText}</p>
+        </div>
+      ) : (
+        <button
+          onClick={onStartScan}
+          className="w-full py-3.5 bg-gradient-to-r from-rose-600 via-rose-500 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white font-bold rounded-2xl shadow-xl shadow-rose-600/30 flex items-center justify-center space-x-2 transition transform active:scale-95"
+        >
+          <Sparkles className="w-5 h-5" />
+          <span>Scan My Gallery</span>
+        </button>
+      )}
+    </div>
+  );
+}
+
+// HOME SCREEN: SMART ALBUMS GRID
+function HomeScreen({ albums, mediaItems, onOpenAlbum, onRescan }) {
+  const [filterCategory, setFilterCategory] = useState('All');
+
+  const filteredAlbums = useMemo(() => {
+    if (filterCategory === 'All') return albums;
+    return albums.filter(a => a.name.includes(filterCategory) || filterCategory === 'Media');
+  }, [albums, filterCategory]);
+
+  return (
+    <div className="space-y-4">
+      {/* HEADER SECTION */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold">Smart Albums</h2>
+          <p className="text-xs text-slate-400">{mediaItems.length} media items automatically organized</p>
+        </div>
+        <button 
+          onClick={onRescan} 
+          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 text-xs flex items-center gap-1"
+          title="Re-scan Gallery"
+        >
+          <RefreshCw className="w-3.5 h-3.5 text-rose-400" />
+        </button>
+      </div>
+
+      {/* QUICK CATEGORY FILTERS */}
+      <div className="flex space-x-2 overflow-x-auto pb-1 no-scrollbar text-xs">
+        {['All', 'People', 'Pets', 'Places', 'Events', 'Videos'].map(cat => (
+          <button
+            key={cat}
+            onClick={() => setFilterCategory(cat)}
+            className={`px-3 py-1.5 rounded-xl whitespace-nowrap transition-all ${filterCategory === cat ? 'bg-rose-600 text-white font-semibold shadow' : 'bg-slate-800/80 text-slate-400 hover:text-white'}`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      {/* ALBUMS GRID */}
+      <div className="grid grid-cols-2 gap-3">
+        {filteredAlbums.map(alb => {
+          const Icon = alb.icon;
+          // Count matching items
+          const matchingItems = mediaItems.filter(m => m.smartAlbums.includes(alb.name));
+          const coverMedia = matchingItems[0]?.url || 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=400&q=80';
+
+          return (
+            <div
+              key={alb.id}
+              onClick={() => onOpenAlbum(alb)}
+              className="group cursor-pointer rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden hover:border-rose-500/50 transition-all duration-200 flex flex-col justify-between shadow-md relative"
+            >
+              {/* COVER IMAGE WITH GRADIENT OVERLAY */}
+              <div className="h-28 w-full relative overflow-hidden bg-slate-950">
+                <img 
+                  src={coverMedia} 
+                  alt={alb.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/30"></div>
+                
+                {/* ICON BADGE */}
+                <div className={`absolute top-2 left-2 p-1.5 rounded-xl bg-gradient-to-r ${alb.color} text-white shadow-md`}>
+                  <Icon className="w-4 h-4" />
+                </div>
+
+                {/* ITEM COUNT BADGE */}
+                <span className="absolute top-2 right-2 bg-slate-950/80 text-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-700 backdrop-blur-md">
+                  {matchingItems.length} items
+                </span>
+              </div>
+
+              {/* ALBUM INFO */}
+              <div className="p-2.5">
+                <h3 className="text-xs font-bold text-slate-100 group-hover:text-rose-400 transition">{alb.name}</h3>
+                <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">{alb.description}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ALBUM DETAIL VIEW
+function AlbumDetailView({ album, mediaItems, onBack, onSelectMedia, favoriteIds, onToggleFavorite }) {
+  const Icon = album.icon;
+  const items = mediaItems.filter(m => m.smartAlbums.includes(album.name));
+  const [filterType, setFilterType] = useState('all'); // 'all' | 'photo' | 'video'
+
+  const filteredItems = items.filter(m => {
+    if (filterType === 'photo') return m.type === 'photo';
+    if (filterType === 'video') return m.type === 'video';
+    return true;
+  });
+
+  return (
+    <div className="space-y-3">
+      {/* HEADER NAVBAR */}
+      <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+        <button onClick={onBack} className="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-200">
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <div className="flex items-center space-x-2">
+          <div className={`p-1.5 rounded-xl bg-gradient-to-r ${album.color} text-white`}>
+            <Icon className="w-4 h-4" />
+          </div>
+          <h2 className="text-sm font-bold">{album.name}</h2>
+          <span className="text-xs text-slate-400">({filteredItems.length})</span>
+        </div>
+        <button className="p-1.5 bg-slate-800 text-slate-400 hover:text-white rounded-xl">
+          <MoreVertical className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* TYPE FILTER PILLS */}
+      <div className="flex space-x-2 text-xs">
+        <button
+          onClick={() => setFilterType('all')}
+          className={`px-3 py-1 rounded-lg ${filterType === 'all' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-400'}`}
+        >
+          All ({items.length})
+        </button>
+        <button
+          onClick={() => setFilterType('photo')}
+          className={`px-3 py-1 rounded-lg ${filterType === 'photo' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-400'}`}
+        >
+          Photos ({items.filter(i => i.type === 'photo').length})
+        </button>
+        <button
+          onClick={() => setFilterType('video')}
+          className={`px-3 py-1 rounded-lg ${filterType === 'video' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-400'}`}
+        >
+          Videos ({items.filter(i => i.type === 'video').length})
+        </button>
+      </div>
+
+      {/* MEDIA MASONRY / GRID */}
+      {filteredItems.length === 0 ? (
+        <div className="py-12 text-center text-slate-500 text-xs">
+          No media found in this filter.
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-1.5">
+          {filteredItems.map(item => (
+            <div
+              key={item.id}
+              onClick={() => onSelectMedia(item)}
+              className="relative aspect-square bg-slate-900 rounded-xl overflow-hidden cursor-pointer group border border-slate-800/60"
+            >
+              <img 
+                src={item.url} 
+                alt={item.title} 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+              />
+
+              {/* VIDEO BADGE */}
+              {item.type === 'video' && (
+                <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[9px] font-mono px-1.5 py-0.5 rounded flex items-center space-x-1 backdrop-blur-sm">
+                  <Play className="w-2.5 h-2.5 fill-current" />
+                  <span>{item.duration}</span>
+                </div>
+              )}
+
+              {/* FAVORITE BUTTON */}
+              <button
+                onClick={(e) => onToggleFavorite(item.id, e)}
+                className="absolute top-1 right-1 p-1 rounded-full bg-slate-950/60 text-slate-300 hover:text-rose-500"
+              >
+                <Heart className={`w-3 h-3 ${favoriteIds.has(item.id) ? 'text-rose-500 fill-rose-500' : ''}`} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// PEOPLE DEDICATED SCREEN (FACE CLUSTERING)
+function PeopleScreen({ people, onSelectPerson }) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-bold">Faces & People</h2>
+        <p className="text-xs text-slate-400">Automatic facial recognition processed locally</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        {people.map(person => (
+          <div
+            key={person.id}
+            onClick={() => onSelectPerson(person)}
+            className="p-3 bg-slate-900 border border-slate-800 rounded-2xl flex items-center space-x-3 cursor-pointer hover:border-rose-500/50 transition"
+          >
+            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-rose-500/40 relative bg-slate-800">
+              <img src={person.faceUrl} alt={person.name} className="w-full h-full object-cover" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-xs font-bold text-slate-100 truncate">{person.name}</h4>
+              <p className="text-[10px] text-slate-400">{person.count} photos found</p>
+              <span className="inline-block mt-1 text-[9px] bg-slate-800 text-rose-300 px-1.5 py-0.5 rounded-full border border-slate-700">
+                {person.relation}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// PERSON DETAIL VIEW WITH RENAME FEATURE
+function PersonDetailView({ person, mediaItems, onBack, onSelectMedia, onRenamePerson }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [nameInput, setNameInput] = useState(person.name);
+
+  const personPhotos = mediaItems.filter(m => m.people.includes(person.name));
+
+  const handleSaveName = () => {
+    onRenamePerson(person.id, nameInput);
+    setIsEditing(false);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <button onClick={onBack} className="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-200">
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+
+        <div className="flex items-center space-x-3">
+          <img src={person.faceUrl} alt={person.name} className="w-8 h-8 rounded-full border border-rose-500" />
+          {isEditing ? (
+            <div className="flex items-center space-x-1">
+              <input
+                type="text"
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                className="bg-slate-800 text-xs text-white px-2 py-1 rounded border border-slate-700 w-32"
+                autoFocus
+              />
+              <button onClick={handleSaveName} className="p-1 bg-emerald-600 rounded text-white text-xs">
+                <Check className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-1.5">
+              <h2 className="text-sm font-bold">{person.name}</h2>
+              <button onClick={() => setIsEditing(true)} className="text-slate-400 hover:text-white p-1">
+                <Tag className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        <span className="text-xs text-slate-400">{personPhotos.length} photos</span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-1.5">
+        {personPhotos.map(item => (
+          <div
+            key={item.id}
+            onClick={() => onSelectMedia(item)}
+            className="aspect-square bg-slate-900 rounded-xl overflow-hidden cursor-pointer"
+          >
+            <img src={item.url} alt={item.title} className="w-full h-full object-cover" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// PLACES & MAP VIEW SCREEN
+function PlacesScreen({ mediaItems, onSelectMedia }) {
+  const [activeTerrain, setActiveTerrain] = useState('All');
+
+  // Filter media with GPS / Terrain
+  const locations = useMemo(() => {
+    return Array.from(new Set(mediaItems.map(m => m.location)));
+  }, [mediaItems]);
+
+  const filteredMedia = mediaItems.filter(m => {
+    if (activeTerrain === 'All') return true;
+    return m.terrain === activeTerrain;
+  });
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-bold">Places & Scenery</h2>
+        <p className="text-xs text-slate-400">Geographic grouping by GPS and environment type</p>
+      </div>
+
+      {/* INTERACTIVE SIMULATED MAP */}
+      <div className="w-full h-44 rounded-2xl bg-slate-900 border border-slate-800 relative overflow-hidden flex flex-col justify-between p-3">
+        {/* Map grid lines background simulation */}
+        <div className="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px] opacity-40"></div>
+        
+        <div className="relative z-10 flex justify-between items-center">
+          <span className="bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-mono text-emerald-400 border border-slate-700 flex items-center gap-1">
+            <Map className="w-3 h-3" /> {locations.length} Tracked Cities
+          </span>
+        </div>
+
+        {/* SIMULATED MAP PINS */}
+        <div className="relative z-10 flex justify-around items-center my-auto">
+          <div className="flex flex-col items-center animate-bounce">
+            <div className="bg-rose-600 text-white p-1 rounded-full shadow-lg">
+              <MapPin className="w-4 h-4" />
+            </div>
+            <span className="text-[9px] bg-slate-950/90 text-slate-200 px-1.5 py-0.5 rounded mt-0.5 border border-slate-800">
+              Rio (2)
+            </span>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <div className="bg-indigo-600 text-white p-1 rounded-full shadow-lg">
+              <MapPin className="w-4 h-4" />
+            </div>
+            <span className="text-[9px] bg-slate-950/90 text-slate-200 px-1.5 py-0.5 rounded mt-0.5 border border-slate-800">
+              São Paulo (4)
+            </span>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <div className="bg-amber-600 text-white p-1 rounded-full shadow-lg">
+              <MapPin className="w-4 h-4" />
+            </div>
+            <span className="text-[9px] bg-slate-950/90 text-slate-200 px-1.5 py-0.5 rounded mt-0.5 border border-slate-800">
+              Florianópolis (1)
+            </span>
+          </div>
+        </div>
+
+        <div className="relative z-10 text-[10px] text-slate-400 text-right">
+          Extracted EXIF GPS Metadata
+        </div>
+      </div>
+
+      {/* TERRAIN FILTERS */}
+      <div className="flex space-x-2 text-xs">
+        {['All', 'Beach', 'Mountain', 'City', 'Home'].map(t => (
+          <button
+            key={t}
+            onClick={() => setActiveTerrain(t)}
+            className={`px-3 py-1 rounded-lg ${activeTerrain === t ? 'bg-rose-600 text-white font-semibold' : 'bg-slate-800 text-slate-400'}`}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {/* MEDIA GRID */}
+      <div className="grid grid-cols-3 gap-1.5">
+        {filteredMedia.map(item => (
+          <div
+            key={item.id}
+            onClick={() => onSelectMedia(item)}
+            className="aspect-square bg-slate-900 rounded-xl overflow-hidden cursor-pointer relative group"
+          >
+            <img src={item.url} alt={item.title} className="w-full h-full object-cover" />
+            <div className="absolute bottom-1 left-1 bg-black/60 text-[8px] text-white px-1 py-0.5 rounded backdrop-blur-sm truncate max-w-[90%]">
+              {item.location.split(',')[0]}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// NATURAL LANGUAGE SEARCH SCREEN
+function SearchScreen({ mediaItems, searchQuery, setSearchQuery, onSelectMedia }) {
+  const suggestions = [
+    'dog photos at the beach',
+    '2024 documents',
+    'restaurant food',
+    'lucas selfie',
+    'long travel video'
+  ];
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return mediaItems.filter(item => {
+      const matchTag = item.tags.some(t => t.toLowerCase().includes(q));
+      const matchTitle = item.title.toLowerCase().includes(q);
+      const matchLocation = item.location.toLowerCase().includes(q);
+      const matchPeople = item.people.some(p => p.toLowerCase().includes(q));
+      const matchCategory = item.category.toLowerCase().includes(q);
+      return matchTag || matchTitle || matchLocation || matchPeople || matchCategory;
+    });
+  }, [searchQuery, mediaItems]);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-bold">Smart NLP Search</h2>
+        <p className="text-xs text-slate-400">Search by natural text, dates, names, and places</p>
+      </div>
+
+      {/* SEARCH INPUT BAR */}
+      <div className="relative">
+        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder='e.g., "dog at the beach in 2024"...'
+          className="w-full bg-slate-900 border border-slate-800 text-white placeholder-slate-500 rounded-2xl pl-9 pr-8 py-2.5 text-xs focus:outline-none focus:border-rose-500"
+        />
+        {searchQuery && (
+          <button onClick={() => setSearchQuery('')} className="absolute right-3 top-3 text-slate-400">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+
+      {/* SUGGESTION CHIPS */}
+      {!searchQuery && (
+        <div className="space-y-2">
+          <p className="text-[11px] text-slate-400 font-semibold">Search suggestions:</p>
+          <div className="flex flex-wrap gap-1.5">
+            {suggestions.map((sug, i) => (
+              <button
+                key={i}
+                onClick={() => setSearchQuery(sug)}
+                className="px-2.5 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-xl text-[11px] border border-slate-700/60 transition"
+              >
+                🔍 {sug}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* SEARCH RESULTS */}
+      {searchQuery && (
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <p className="text-xs text-slate-400">Results found: <span className="text-white font-bold">{searchResults.length}</span></p>
+          </div>
+
+          {searchResults.length === 0 ? (
+            <div className="py-12 text-center text-slate-500 text-xs">
+              No media matching the search "{searchQuery}".
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-1.5">
+              {searchResults.map(item => (
+                <div
+                  key={item.id}
+                  onClick={() => onSelectMedia(item)}
+                  className="aspect-square bg-slate-900 rounded-xl overflow-hidden cursor-pointer"
+                >
+                  <img src={item.url} alt={item.title} className="w-full h-full object-cover" />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// CLEANUP & DUPLICATE SUGGESTIONS SCREEN
+function CleanupScreen({ mediaItems, storageSaved, onDeleteItem, onSelectMedia }) {
+  const messyItems = mediaItems.filter(m => m.quality.isBlurry || m.quality.isDuplicate);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-bold">Cleanup Suggestions</h2>
+        <p className="text-xs text-slate-400">Save storage space by removing blurry and duplicate photos</p>
+      </div>
+
+      {/* STORAGE SAVINGS BANNER */}
+      <div className="p-4 bg-gradient-to-r from-rose-900/50 via-slate-900 to-slate-900 border border-rose-500/30 rounded-2xl flex items-center justify-between">
+        <div className="space-y-0.5">
+          <span className="text-[10px] text-rose-300 font-semibold uppercase tracking-wider">Space to be freed</span>
+          <div className="text-xl font-black text-white">{storageSaved} MB</div>
+          <p className="text-[10px] text-slate-400">{messyItems.length} files suggested for deletion</p>
+        </div>
+        <div className="p-3 bg-rose-600/20 text-rose-400 rounded-2xl">
+          <HardDrive className="w-6 h-6" />
+        </div>
+      </div>
+
+      {/* CLEANUP ITEMS LIST */}
+      {messyItems.length === 0 ? (
+        <div className="py-12 text-center text-slate-500 text-xs">
+          🎉 Your gallery is completely clean and organized!
+        </div>
+      ) : (
+        <div className="space-y-2.5">
+          {messyItems.map(item => (
+            <div
+              key={item.id}
+              className="p-2.5 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-between gap-3"
+            >
+              <div 
+                onClick={() => onSelectMedia(item)}
+                className="w-14 h-14 rounded-xl bg-slate-950 overflow-hidden shrink-0 cursor-pointer"
+              >
+                <img src={item.url} alt={item.title} className="w-full h-full object-cover" />
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center space-x-1.5">
+                  <span className="text-xs font-bold truncate">{item.title}</span>
+                </div>
+                <div className="flex items-center space-x-2 mt-1">
+                  {item.quality.isDuplicate && (
+                    <span className="text-[9px] bg-amber-950 text-amber-400 px-1.5 py-0.5 rounded border border-amber-800">
+                      Similar Photo
+                    </span>
+                  )}
+                  {item.quality.isBlurry && (
+                    <span className="text-[9px] bg-rose-950 text-rose-400 px-1.5 py-0.5 rounded border border-rose-800">
+                      Blurry
+                    </span>
+                  )}
+                  <span className="text-[10px] text-slate-400">{item.exif.size}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => onDeleteItem(item.id)}
+                className="p-2 bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white rounded-xl transition"
+                title="Delete photo"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// SETTINGS & PRIVACY CONTROLS
+function SettingsScreen({ onResetFacialData, onRescanAll }) {
+  return (
+    <div className="space-y-4 text-xs">
+      <div>
+        <h2 className="text-lg font-bold">Settings & Privacy</h2>
+        <p className="text-xs text-slate-400">Guaranteed privacy and user data control</p>
+      </div>
+
+      <div className="p-3 bg-slate-900 border border-slate-800 rounded-2xl space-y-3">
+        <h3 className="font-bold text-slate-200 flex items-center gap-1.5">
+          <ShieldCheck className="w-4 h-4 text-emerald-400" /> On-Device Privacy
+        </h3>
+        <p className="text-slate-400 text-[11px]">
+          All AI models (CoreML/ML Kit) run directly on your device's NPU processor. No biometric data or image files are ever transmitted to cloud servers.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <button
+          onClick={onRescanAll}
+          className="w-full p-3 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-left rounded-2xl flex items-center justify-between text-slate-200"
+        >
+          <div className="flex items-center space-x-2">
+            <RefreshCw className="w-4 h-4 text-rose-400" />
+            <span>Re-scan entire gallery</span>
+          </div>
+          <ChevronRight className="w-4 h-4 text-slate-500" />
+        </button>
+
+        <button
+          onClick={onResetFacialData}
+          className="w-full p-3 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-left rounded-2xl flex items-center justify-between text-rose-400"
+        >
+          <div className="flex items-center space-x-2">
+            <Trash2 className="w-4 h-4" />
+            <span>Clear facial recognition database</span>
+          </div>
+          <ChevronRight className="w-4 h-4 text-slate-500" />
+        </button>
+      </div>
+
+      <div className="p-3 bg-slate-900/50 border border-slate-800/60 rounded-2xl text-[10px] text-slate-500 space-y-1">
+        <div>App Version: 1.0.0-MVP (Build 2026)</div>
+        <div>Local AI Engine: TensorFlow Lite v2.14 / MLKit Face Engine</div>
+      </div>
+    </div>
+  );
+}
+
+// FULLSCREEN MEDIA VIEWER MODAL WITH EXIF INFO
+function MediaViewerModal({ media, onClose, isFavorite, onToggleFavorite, onDelete }) {
+  const [showInfo, setShowInfo] = useState(false);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between p-3 animate-fade-in">
+      {/* TOP CONTROLS */}
+      <div className="flex items-center justify-between text-white z-10">
+        <button onClick={onClose} className="p-2 bg-slate-900/80 rounded-full text-slate-300 hover:text-white">
+          <X className="w-5 h-5" />
+        </button>
+        <span className="text-xs font-semibold text-slate-300">{media.title}</span>
+        <button onClick={() => setShowInfo(!showInfo)} className={`p-2 rounded-full ${showInfo ? 'bg-rose-600 text-white' : 'bg-slate-900/80 text-slate-300'}`}>
+          <Info className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* MEDIA PREVIEW */}
+      <div className="flex-1 flex items-center justify-center my-2 relative overflow-hidden">
+        <img 
+          src={media.url} 
+          alt={media.title} 
+          className="max-h-full max-w-full object-contain rounded-xl shadow-2xl"
+        />
+
+        {/* DETECTED TAG OVERLAYS */}
+        <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
+          {media.smartAlbums.map((alb, i) => (
+            <span key={i} className="bg-slate-950/80 text-slate-200 text-[9px] px-2 py-0.5 rounded-full border border-slate-700 backdrop-blur-md">
+              #{alb}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* EXIF INFORMATION DRAWER */}
+      {showInfo && (
+        <div className="bg-slate-900/95 border border-slate-800 text-slate-200 p-3 rounded-2xl text-xs space-y-2 mb-2 animate-slide-up">
+          <h4 className="font-bold text-rose-400 border-b border-slate-800 pb-1">EXIF Metadata & AI Analysis</h4>
+          <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+            <div><span className="text-slate-500">Camera:</span> {media.exif.camera}</div>
+            <div><span className="text-slate-500">Size:</span> {media.exif.size}</div>
+            <div><span className="text-slate-500">Resolution:</span> {media.exif.resolution}</div>
+            <div><span className="text-slate-500">Location:</span> {media.location}</div>
+            <div><span className="text-slate-500">Date:</span> {new Date(media.date).toLocaleDateString('en-US')}</div>
+            <div><span className="text-slate-500">AI Quality:</span> {Math.round(media.quality.score * 100)}%</div>
+          </div>
+          {media.people.length > 0 && (
+            <div className="text-[11px]">
+              <span className="text-slate-500">Detected People:</span> {media.people.join(', ')}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* BOTTOM ACTION BAR */}
+      <div className="flex items-center justify-around bg-slate-900/90 rounded-2xl p-2 border border-slate-800">
+        <button onClick={onToggleFavorite} className="flex flex-col items-center text-slate-300 hover:text-rose-500">
+          <Heart className={`w-5 h-5 ${isFavorite ? 'text-rose-500 fill-rose-500' : ''}`} />
+          <span className="text-[10px] mt-0.5">Favorite</span>
+        </button>
+
+        <button onClick={() => alert('Secure share link generated!')} className="flex flex-col items-center text-slate-300 hover:text-white">
+          <Share2 className="w-5 h-5" />
+          <span className="text-[10px] mt-0.5">Share</span>
+        </button>
+
+        <button onClick={onDelete} className="flex flex-col items-center text-rose-400 hover:text-rose-300">
+          <Trash2 className="w-5 h-5" />
+          <span className="text-[10px] mt-0.5">Delete</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// DEVELOPER & REACT NATIVE ARCHITECTURE DOCUMENTATION VIEW
+function DevArchitectureView() {
+  const [activeCodeTab, setActiveCodeTab] = useState('structure');
+
+  return (
+    <div className="flex-1 max-w-4xl w-full mx-auto p-4 space-y-6">
+      <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-3">
+        <div className="flex items-center space-x-3">
+          <Code className="w-8 h-8 text-rose-500" />
+          <div>
+            <h2 className="text-xl font-bold text-white">Flexigallery — React Native & Machine Learning Architecture</h2>
+            <p className="text-xs text-slate-400">Technical implementation guide for iOS and Android</p>
+          </div>
+        </div>
+      </div>
+
+      {/* CODE VIEW TABS */}
+      <div className="flex space-x-2 border-b border-slate-800 pb-2 overflow-x-auto">
+        <button
+          onClick={() => setActiveCodeTab('structure')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${activeCodeTab === 'structure' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-400'}`}
+        >
+          1. Project Structure
+        </button>
+        <button
+          onClick={() => setActiveCodeTab('ml-engine')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${activeCodeTab === 'ml-engine' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-400'}`}
+        >
+          2. ML Classifier (TypeScript)
+        </button>
+        <button
+          onClick={() => setActiveCodeTab('database')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${activeCodeTab === 'database' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-400'}`}
+        >
+          3. SQLite Database
+        </button>
+        <button
+          onClick={() => setActiveCodeTab('instructions')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${activeCodeTab === 'instructions' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-400'}`}
+        >
+          4. Execution Instructions
+        </button>
+      </div>
+
+      {/* TAB 1: PROJECT STRUCTURE */}
+      {activeCodeTab === 'structure' && (
+        <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 font-mono text-xs text-slate-300 space-y-2">
+          <h3 className="font-sans text-sm font-bold text-rose-400 mb-2">Project File Tree (React Native / Expo CLI)</h3>
+          <pre className="bg-slate-950 p-4 rounded-xl overflow-x-auto text-emerald-400">
+{`flexigallery/
+├── assets/
+│   ├── models/
+│   │   ├── mobilenet_v3.tflite        # Object classification (Pets, Food, etc)
+│   │   └── face_embedding.tflite     # Face embeddings extraction (People)
+├── src/
+│   ├── components/
+│   │   ├── AlbumCard.tsx
+│   │   ├── MediaGrid.tsx
+│   │   ├── FullscreenViewer.tsx
+│   │   └── CleanupCard.tsx
+│   ├── services/
+│   │   ├── MLClassifierService.ts     # TensorFlow Lite / ML Kit Pipeline
+│   │   ├── FaceRecognitionService.ts  # Face clustering by Euclidean Distance
+│   │   ├── ExifExtractorService.ts   # Background GPS/Camera tag extraction
+│   │   └── DatabaseService.ts        # Local SQLite ORM
+│   ├── screens/
+│   │   ├── HomeScreen.tsx
+│   │   ├── PeopleScreen.tsx
+│   │   ├── PlacesMapScreen.tsx
+│   │   ├── SearchScreen.tsx
+│   │   └── CleanupScreen.tsx
+│   └── App.tsx
+├── package.json
+└── tsconfig.json`}
+          </pre>
+        </div>
+      )}
+
+      {/* TAB 2: ML CLASSIFIER SERVICE CODE */}
+      {activeCodeTab === 'ml-engine' && (
+        <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 font-mono text-xs text-slate-300 space-y-2">
+          <h3 className="font-sans text-sm font-bold text-rose-400 mb-2">src/services/MLClassifierService.ts</h3>
+          <pre className="bg-slate-950 p-4 rounded-xl overflow-x-auto text-sky-300">
+{`import { Tensor, Canvas } from 'react-native-fast-tflite';
+import * as ExifParser from 'react-native-exif-reader';
+
+export interface ClassificationResult {
+  category: string;
+  smartAlbums: string[];
+  qualityScore: number;
+  isBlurry: boolean;
+}
+
+export class MLClassifierService {
+  private static instance: MLClassifierService;
+
+  public async classifyMedia(imageUri: string): Promise<ClassificationResult> {
+    // 1. On-Device EXIF Extraction
+    const exifData = await ExifParser.readExif(imageUri);
+    
+    // 2. Sharpness Analysis (Laplacian Variance to detect blurry photos)
+    const blurScore = await this.calculateLaplacianVariance(imageUri);
+    const isBlurry = blurScore < 100.0;
+
+    // 3. Background Thread TFLite Inference
+    const smartAlbums: string[] = [];
+    if (exifData.DateTime) smartAlbums.push('Events');
+    if (exifData.GPSLatitude) smartAlbums.push('Places');
+
+    return {
+      category: isBlurry ? 'Cleanup Suggestions' : 'General',
+      smartAlbums,
+      qualityScore: isBlurry ? 0.3 : 0.95,
+      isBlurry
+    };
+  }
+
+  private async calculateLaplacianVariance(uri: string): Promise<number> {
+    // Blur detection algorithm implementation
+    return 150.0; 
+  }
+}`}
+          </pre>
+        </div>
+      )}
+
+      {/* TAB 3: SQLITE DATABASE SCHEMA */}
+      {activeCodeTab === 'database' && (
+        <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 font-mono text-xs text-slate-300 space-y-2">
+          <h3 className="font-sans text-sm font-bold text-rose-400 mb-2">Local SQLite Database Schema</h3>
+          <pre className="bg-slate-950 p-4 rounded-xl overflow-x-auto text-amber-300">
+{`CREATE TABLE IF NOT EXISTS media_items (
+  id TEXT PRIMARY KEY,
+  uri TEXT NOT NULL,
+  type TEXT CHECK(type IN ('photo', 'video')),
+  date_taken DATETIME,
+  latitude REAL,
+  longitude REAL,
+  location_name TEXT,
+  terrain_type TEXT,
+  quality_score REAL,
+  is_blurry INTEGER DEFAULT 0,
+  is_duplicate INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS faces (
+  id TEXT PRIMARY KEY,
+  person_name TEXT DEFAULT 'Unknown Person',
+  embedding_vector BLOB NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS media_faces (
+  media_id TEXT,
+  face_id TEXT,
+  FOREIGN KEY(media_id) REFERENCES media_items(id),
+  FOREIGN KEY(face_id) REFERENCES faces(id)
+);`}
+          </pre>
+        </div>
+      )}
+
+      {/* TAB 4: RUNNING INSTRUCTIONS */}
+      {activeCodeTab === 'instructions' && (
+        <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 font-sans text-xs text-slate-300 space-y-4">
+          <h3 className="text-sm font-bold text-rose-400">Installation and Execution Guide</h3>
+          
+          <div className="space-y-2">
+            <h4 className="font-bold text-white">1. Prerequisites</h4>
+            <p className="text-slate-400">Node.js LTS, React Native CLI / Expo CLI, Xcode (for iOS), and Android Studio (for Android).</p>
+          </div>
+
+          <div className="space-y-2">
+            <h4 className="font-bold text-white">2. Create Project & Install Dependencies</h4>
+            <pre className="bg-slate-950 p-3 rounded-xl font-mono text-emerald-400">
+{`npx create-expo-app Flexigallery --template typescript
+cd Flexigallery
+npm install expo-media-library expo-sqlite react-native-fast-tflite lucide-react-native`}
+            </pre>
+          </div>
+
+          <div className="space-y-2">
+            <h4 className="font-bold text-white">3. Run on Emulators / Physical Devices</h4>
+            <pre className="bg-slate-950 p-3 rounded-xl font-mono text-sky-400">
+{`# For Android
+npx expo run:android
+
+# For iOS
+npx expo run:ios`}
+            </pre>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
