@@ -1,1552 +1,1558 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Camera, Image, Film, Users, MapPin, Search, Trash2, Settings, Sparkles,
-  Play, Share2, Filter, CheckCircle, Plus, ChevronLeft, Moon, Sun, Download,
-  Info, X, ShieldCheck, Cpu, Zap, Folder, Eye, Heart, MoreVertical, Grid,
-  List, FileText, Dog, Smile, Car, Utensils, Trees, Smartphone, Maximize2,
-  ChevronRight, Check, Copy, Code, ArrowRight, RefreshCw, AlertCircle, Layers,
-  Compass, HardDrive, CheckSquare, Square, Tag, Sliders, Map, Clock, FileImage
-} from 'lucide-react';
-
-// ==========================================
-// MOCK DATA INITIALIZATION (10,000+ Scalable)
-// ==========================================
-
-const INITIAL_MEDIA_ITEMS = [
-  {
-    id: 'm1',
-    type: 'photo',
-    url: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80',
-    title: 'Bob at Copacabana Beach',
-    date: '2024-03-15T14:30:00',
-    location: 'Rio de Janeiro, RJ',
-    coords: { lat: -22.9711, lng: -43.1822 },
-    terrain: 'Beach',
-    category: 'Pets & Animals',
-    tags: ['pets', 'dog', 'beach', 'nature', 'ocean'],
-    people: ['Maria Silva'],
-    exif: { camera: 'iPhone 15 Pro', focal: '24mm', iso: 50, shutter: '1/2000s', size: '3.4 MB', resolution: '4032x3024' },
-    quality: { isBlurry: false, isDuplicate: false, score: 0.98 },
-    smartAlbums: ['Pets & Animals', 'Places', 'Nature & Landscapes', 'People']
-  },
-  {
-    id: 'm2',
-    type: 'photo',
-    url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80',
-    title: 'Selfie in the Park',
-    date: '2024-02-10T11:15:00',
-    location: 'São Paulo, SP',
-    coords: { lat: -23.5505, lng: -46.6333 },
-    terrain: 'City',
-    category: 'Selfies',
-    tags: ['selfie', 'people', 'park', 'smile'],
-    people: ['Maria Silva', 'João Santos'],
-    exif: { camera: 'Samsung Galaxy S24', focal: '23mm', iso: 100, shutter: '1/1000s', size: '2.8 MB', resolution: '4000x3000' },
-    quality: { isBlurry: false, isDuplicate: false, score: 0.92 },
-    smartAlbums: ['Selfies', 'People', 'Places']
-  },
-  {
-    id: 'm3',
-    type: 'video',
-    url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
-    videoType: 'long',
-    duration: '04:12',
-    title: 'Sunset in Florianópolis',
-    date: '2023-11-20T18:45:00',
-    location: 'Florianópolis, SC',
-    coords: { lat: -27.5948, lng: -48.5482 },
-    terrain: 'Beach',
-    category: 'Videos',
-    tags: ['video', 'beach', 'sunset', 'travel', 'nature'],
-    people: [],
-    exif: { camera: 'iPhone 14 Pro', focal: '13mm', iso: 64, shutter: '1/500s', size: '145.2 MB', resolution: '4K 60fps' },
-    quality: { isBlurry: false, isDuplicate: false, score: 0.96 },
-    smartAlbums: ['Videos', 'Places', 'Nature & Landscapes', 'Events']
-  },
-  {
-    id: 'm4',
-    type: 'photo',
-    url: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=800&q=80',
-    title: "Lucas' Surprise Birthday Party",
-    date: '2024-01-05T20:00:00',
-    location: 'Curitiba, PR',
-    coords: { lat: -25.4284, lng: -49.2733 },
-    terrain: 'Home',
-    category: 'Events',
-    tags: ['events', 'party', 'birthday', 'friends', 'cake'],
-    people: ['Lucas Oliveira', 'Maria Silva'],
-    exif: { camera: 'iPhone 15 Pro', focal: '24mm', iso: 400, shutter: '1/60s', size: '4.1 MB', resolution: '4032x3024' },
-    quality: { isBlurry: false, isDuplicate: false, score: 0.89 },
-    smartAlbums: ['Events', 'People']
-  },
-  {
-    id: 'm5',
-    type: 'photo',
-    url: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80',
-    title: 'Artisanal Pizza Dinner',
-    date: '2024-03-01T21:10:00',
-    location: 'São Paulo, SP',
-    coords: { lat: -23.5505, lng: -46.6333 },
-    terrain: 'City',
-    category: 'Food',
-    tags: ['food', 'pizza', 'restaurant', 'dinner'],
-    people: [],
-    exif: { camera: 'Google Pixel 8', focal: '25mm', iso: 200, shutter: '1/120s', size: '3.0 MB', resolution: '4080x3072' },
-    quality: { isBlurry: false, isDuplicate: false, score: 0.94 },
-    smartAlbums: ['Food', 'Places']
-  },
-  {
-    id: 'm6',
-    type: 'photo',
-    url: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80',
-    title: 'Vintage Car Exhibition',
-    date: '2023-09-14T10:20:00',
-    location: 'Belo Horizonte, MG',
-    coords: { lat: -19.9167, lng: -43.9345 },
-    terrain: 'City',
-    category: 'Vehicles',
-    tags: ['vehicles', 'car', 'classic', 'exhibition'],
-    people: [],
-    exif: { camera: 'Sony A7 IV', focal: '35mm', iso: 100, shutter: '1/1000s', size: '12.4 MB', resolution: '6000x4000' },
-    quality: { isBlurry: false, isDuplicate: false, score: 0.99 },
-    smartAlbums: ['Vehicles', 'Places']
-  },
-  {
-    id: 'm7',
-    type: 'photo',
-    url: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80',
-    title: 'Tax Payment Receipt',
-    date: '2024-01-15T09:05:00',
-    location: 'Home',
-    coords: { lat: -23.5505, lng: -46.6333 },
-    terrain: 'Home',
-    category: 'Documents & Screenshots',
-    tags: ['documents', 'receipt', 'pdf', 'bank', 'screenshot'],
-    people: [],
-    exif: { camera: 'Screenshot', focal: 'N/A', iso: 0, shutter: 'N/A', size: '850 KB', resolution: '1170x2532' },
-    quality: { isBlurry: false, isDuplicate: false, score: 0.75 },
-    smartAlbums: ['Documents & Screenshots']
-  },
-  {
-    id: 'm8',
-    type: 'photo',
-    url: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80',
-    title: 'Kitten Sleeping on the Sofa',
-    date: '2024-02-28T16:40:00',
-    location: 'Home',
-    coords: { lat: -23.5505, lng: -46.6333 },
-    terrain: 'Home',
-    category: 'Pets & Animals',
-    tags: ['pets', 'cat', 'cute', 'home', 'animals'],
-    people: [],
-    exif: { camera: 'iPhone 15 Pro', focal: '77mm', iso: 320, shutter: '1/100s', size: '2.9 MB', resolution: '4032x3024' },
-    quality: { isBlurry: false, isDuplicate: false, score: 0.91 },
-    smartAlbums: ['Pets & Animals']
-  },
-  {
-    id: 'm9',
-    type: 'photo',
-    url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80',
-    title: 'Hiking at Mountain Trail',
-    date: '2023-12-10T08:15:00',
-    location: 'Campos do Jordão, SP',
-    coords: { lat: -22.7394, lng: -45.5913 },
-    terrain: 'Mountain',
-    category: 'Nature & Landscapes',
-    tags: ['nature', 'mountain', 'hiking', 'travel', 'landscape'],
-    people: ['Lucas Oliveira'],
-    exif: { camera: 'iPhone 13', focal: '26mm', iso: 32, shutter: '1/1500s', size: '3.9 MB', resolution: '4032x3024' },
-    quality: { isBlurry: false, isDuplicate: false, score: 0.97 },
-    smartAlbums: ['Nature & Landscapes', 'Places', 'People']
-  },
-  {
-    id: 'm10',
-    type: 'photo',
-    url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
-    title: 'Portrait of Maria Silva',
-    date: '2024-03-02T15:00:00',
-    location: 'São Paulo, SP',
-    coords: { lat: -23.5505, lng: -46.6333 },
-    terrain: 'City',
-    category: 'People',
-    tags: ['people', 'portrait', 'maria', 'studio'],
-    people: ['Maria Silva'],
-    exif: { camera: 'Canon EOS R6', focal: '85mm', iso: 100, shutter: '1/500s', size: '8.5 MB', resolution: '6000x4000' },
-    quality: { isBlurry: false, isDuplicate: false, score: 0.99 },
-    smartAlbums: ['People']
-  },
-  {
-    id: 'm11',
-    type: 'photo',
-    url: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80',
-    title: 'Bob at the Beach (Duplicate Photo)',
-    date: '2024-03-15T14:30:02',
-    location: 'Rio de Janeiro, RJ',
-    coords: { lat: -22.9711, lng: -43.1822 },
-    terrain: 'Beach',
-    category: 'Pets & Animals',
-    tags: ['pets', 'dog', 'duplicate'],
-    people: ['Maria Silva'],
-    exif: { camera: 'iPhone 15 Pro', focal: '24mm', iso: 50, shutter: '1/2000s', size: '3.3 MB', resolution: '4032x3024' },
-    quality: { isBlurry: false, isDuplicate: true, duplicateGroupId: 'dup-1', score: 0.60 },
-    smartAlbums: ['Cleanup Suggestions', 'Pets & Animals']
-  },
-  {
-    id: 'm12',
-    type: 'photo',
-    url: 'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=800&q=80',
-    title: 'Blurry Photo at Restaurant',
-    date: '2024-02-14T22:10:00',
-    location: 'São Paulo, SP',
-    coords: { lat: -23.5505, lng: -46.6333 },
-    terrain: 'City',
-    category: 'Food',
-    tags: ['blurry', 'low quality'],
-    people: [],
-    exif: { camera: 'iPhone 12', focal: '26mm', iso: 800, shutter: '1/15s', size: '1.8 MB', resolution: '4032x3024' },
-    quality: { isBlurry: true, isDuplicate: false, score: 0.30 },
-    smartAlbums: ['Cleanup Suggestions']
-  }
-];
-
-const PEOPLE_PROFILES = [
-  { id: 'p1', name: 'Maria Silva', faceUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80', count: 4, relation: 'Family' },
-  { id: 'p2', name: 'Lucas Oliveira', faceUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80', count: 2, relation: 'Friend' },
-  { id: 'p3', name: 'João Santos', faceUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80', count: 1, relation: 'Colleague' },
-  { id: 'p4', name: 'Unidentified Person #1', faceUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80', count: 3, relation: 'Unknown' }
-];
-
-const AUTOMATIC_ALBUMS = [
-  { id: 'alb-pessoas', name: 'People', icon: Users, color: 'from-pink-500 to-rose-600', description: 'Automatic facial recognition' },
-  { id: 'alb-pets', name: 'Pets & Animals', icon: Dog, color: 'from-amber-500 to-orange-600', description: 'Dogs, cats, birds and more' },
-  { id: 'alb-lugares', name: 'Places', icon: MapPin, color: 'from-emerald-500 to-teal-600', description: 'By GPS & scenery type' },
-  { id: 'alb-eventos', name: 'Events', icon: Sparkles, color: 'from-purple-500 to-indigo-600', description: 'Birthdays, parties & trips' },
-  { id: 'alb-comida', name: 'Food', icon: Utensils, color: 'from-red-500 to-pink-600', description: 'Dishes, restaurants & recipes' },
-  { id: 'alb-veiculos', name: 'Vehicles', icon: Car, color: 'from-blue-500 to-cyan-600', description: 'Cars, bikes & transportation' },
-  { id: 'alb-docs', name: 'Documents & Screenshots', icon: FileText, color: 'from-slate-600 to-gray-800', description: 'Receipts, prints & text' },
-  { id: 'alb-natureza', name: 'Nature & Landscapes', icon: Trees, color: 'from-green-500 to-emerald-700', description: 'Beaches, mountains & forests' },
-  { id: 'alb-selfies', name: 'Selfies', icon: Smile, color: 'from-violet-500 to-purple-700', description: 'Close-up portraits' },
-  { id: 'alb-videos', name: 'Videos', icon: Film, color: 'from-sky-500 to-blue-700', description: 'Long, short & slow-motion' },
-  { id: 'alb-limpeza', name: 'Cleanup Suggestions', icon: Trash2, color: 'from-rose-600 to-red-800', description: 'Duplicates, blurry & heavy files' }
-];
-
-// ==========================================
-// MAIN COMPONENT ENTRY POINT
-// ==========================================
-
-export default function App() {
-  // App Global State
-  const [theme, setTheme] = useState('dark');
-  const [viewMode, setViewMode] = useState('app'); // 'app' | 'dev-docs'
-  const [isOnboarded, setIsOnboarded] = useState(false);
-  const [isScanning, setIsScanning] = useState(false);
-  const [scanProgress, setScanProgress] = useState(0);
-  const [scanStatusText, setScanStatusText] = useState('');
-  
-  // Navigation State inside App Preview
-  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'people' | 'places' | 'search' | 'cleanup' | 'settings'
-  const [selectedAlbum, setSelectedAlbum] = useState(null);
-  const [selectedMedia, setSelectedMedia] = useState(null);
-  const [selectedPerson, setSelectedPerson] = useState(null);
-
-  // App Data State
-  const [mediaItems, setMediaItems] = useState(INITIAL_MEDIA_ITEMS);
-  const [people, setPeople] = useState(PEOPLE_PROFILES);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [toastMessage, setToastMessage] = useState(null);
-  const [favoriteIds, setFavoriteIds] = useState(new Set());
-
-  // Smart Notification banner state
-  const [smartSuggestion, setSmartSuggestion] = useState({
-    visible: true,
-    title: 'New Album Recommendation!',
-    description: 'We found 5 photos from your weekend at the beach. Would you like to create "Weekend at the Beach"?',
-  });
-
-  // Trigger Toast
-  const showToast = (msg) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
-
-  // Simulate Scanning process
-  const startScanningProcess = () => {
-    setIsScanning(true);
-    setScanProgress(5);
-    setScanStatusText('Reading EXIF metadata and geolocation...');
-
-    const steps = [
-      { p: 25, txt: 'Executing ML Kit Face Detection on-device...' },
-      { p: 55, txt: 'Classifying objects with TensorFlow Lite...' },
-      { p: 80, txt: 'Identifying duplicate and blurry photos...' },
-      { p: 100, txt: 'Organization completed successfully!' }
-    ];
-
-    steps.forEach((step, idx) => {
-      setTimeout(() => {
-        setScanProgress(step.p);
-        setScanStatusText(step.txt);
-        if (step.p === 100) {
-          setTimeout(() => {
-            setIsScanning(false);
-            setIsOnboarded(true);
-            showToast('12 media items organized into 11 smart albums!');
-          }, 800);
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flexigallery - On-Device AI Gallery Organizer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        },
+                        accent: {
+                            500: '#10b981',
+                            600: '#059669',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
         }
-      }, (idx + 1) * 900);
-    });
-  };
-
-  // Toggle Favorites
-  const toggleFavorite = (id, e) => {
-    if (e) e.stopPropagation();
-    const next = new Set(favoriteIds);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setFavoriteIds(next);
-    showToast(next.has(id) ? 'Added to Favorites' : 'Removed from Favorites');
-  };
-
-  // Delete Item
-  const handleDeleteItem = (id) => {
-    setMediaItems(prev => prev.filter(item => item.id !== id));
-    if (selectedMedia?.id === id) setSelectedMedia(null);
-    showToast('Item moved to device trash');
-  };
-
-  // Rename Person
-  const handleRenamePerson = (personId, newName) => {
-    if (!newName.trim()) return;
-    setPeople(prev => prev.map(p => p.id === personId ? { ...p, name: newName } : p));
-    showToast(`Person renamed to "${newName}"`);
-  };
-
-  // Compute stats
-  const totalStorageSaved = useMemo(() => {
-    return mediaItems
-      .filter(m => m.quality.isBlurry || m.quality.isDuplicate)
-      .reduce((acc, m) => acc + (parseFloat(m.exif.size) || 2), 0)
-      .toFixed(1);
-  }, [mediaItems]);
-
-  return (
-    <div className={`${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-900'} min-h-screen font-sans transition-colors duration-200 flex flex-col`}>
-      
-      {/* GLOBAL HEADER & VIEW SWITCHER */}
-      <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 text-white px-4 py-3 flex flex-wrap items-center justify-between gap-3 shadow-md">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-rose-500/20">
-            <Sparkles className="w-6 h-6 text-white animate-pulse" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-amber-200 via-rose-300 to-indigo-200 bg-clip-text text-transparent">
-              Flexigallery
-            </h1>
-            <p className="text-xs text-slate-400 flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3 text-emerald-400" /> 100% Private On-Device AI
-            </p>
-          </div>
-        </div>
-
-        {/* Header Actions */}
-        <div className="flex items-center space-x-2">
-          {/* Switch Mode: App vs Code Specs */}
-          <div className="bg-slate-800 p-1 rounded-xl flex items-center border border-slate-700 text-xs font-medium">
-            <button
-              onClick={() => setViewMode('app')}
-              className={`px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all ${viewMode === 'app' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
-            >
-              <Smartphone className="w-3.5 h-3.5" />
-              <span>Mobile App Demo</span>
-            </button>
-            <button
-              onClick={() => setViewMode('dev-docs')}
-              className={`px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all ${viewMode === 'dev-docs' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
-            >
-              <Code className="w-3.5 h-3.5" />
-              <span>Architecture & RN Code</span>
-            </button>
-          </div>
-
-          {/* Theme Switcher */}
-          <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
-            title="Toggle Theme"
-          >
-            {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
-          </button>
-        </div>
-      </header>
-
-      {/* TOAST NOTIFICATION */}
-      {toastMessage && (
-        <div className="fixed top-16 right-4 z-50 bg-slate-900 border border-emerald-500/40 text-emerald-300 px-4 py-2.5 rounded-2xl shadow-2xl flex items-center space-x-2 animate-bounce">
-          <CheckCircle className="w-4 h-4 text-emerald-400" />
-          <span className="text-xs font-semibold">{toastMessage}</span>
-        </div>
-      )}
-
-      {/* VIEW 1: DEV DOCS & ARCHITECTURE SPECIFICATION */}
-      {viewMode === 'dev-docs' ? (
-        <DevArchitectureView />
-      ) : (
-        /* VIEW 2: INTERACTIVE MOBILE APP SIMULATOR */
-        <main className="flex-1 max-w-md w-full mx-auto p-2 sm:p-4 flex flex-col justify-start">
-          
-          {/* MOBILE PHONE FRAME CONTAINER */}
-          <div className={`w-full rounded-[2.5rem] border-4 ${theme === 'dark' ? 'border-slate-800 bg-slate-900 shadow-2xl shadow-indigo-950/40' : 'border-slate-300 bg-white shadow-xl'} overflow-hidden flex flex-col min-h-[780px] relative`}>
-            
-            {/* MOBILE STATUS BAR SIMULATION */}
-            <div className="bg-slate-950 text-slate-400 px-6 py-2 flex items-center justify-between text-xs font-mono select-none">
-              <span>9:41</span>
-              <div className="w-20 h-4 bg-slate-900 rounded-full flex items-center justify-center">
-                <div className="w-3 h-3 bg-slate-800 rounded-full"></div>
-              </div>
-              <div className="flex items-center space-x-1.5">
-                <Zap className="w-3 h-3 text-amber-400" />
-                <span>5G</span>
-                <span className="text-[10px] bg-emerald-950 text-emerald-400 px-1 rounded border border-emerald-800">100%</span>
-              </div>
-            </div>
-
-            {/* SCREEN 1: ONBOARDING & SCANNING */}
-            {!isOnboarded ? (
-              <OnboardingScreen 
-                isScanning={isScanning}
-                scanProgress={scanProgress}
-                scanStatusText={scanStatusText}
-                onStartScan={startScanningProcess}
-              />
-            ) : (
-              /* MAIN APP INTERFACE WITH BOTTOM NAVIGATION */
-              <div className="flex-1 flex flex-col relative overflow-hidden">
-                
-                {/* SMART SUGGESTION BANNER */}
-                {smartSuggestion.visible && activeTab === 'home' && !selectedAlbum && (
-                  <div className="m-3 p-3.5 bg-gradient-to-r from-rose-900/40 via-indigo-900/40 to-slate-900 border border-rose-500/30 rounded-2xl flex items-start justify-between gap-2 shadow-lg backdrop-blur-sm animate-fade-in">
-                    <div className="flex items-start space-x-3">
-                      <div className="p-2 bg-rose-500/20 text-rose-400 rounded-xl mt-0.5">
-                        <Sparkles className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-bold text-rose-200">{smartSuggestion.title}</h4>
-                        <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">{smartSuggestion.description}</p>
-                        <div className="mt-2 flex space-x-2">
-                          <button 
-                            onClick={() => {
-                              showToast('Album "Weekend at the Beach" created successfully!');
-                              setSmartSuggestion(prev => ({ ...prev, visible: false }));
-                            }}
-                            className="px-2.5 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-[11px] font-semibold transition"
-                          >
-                            Create Album
-                          </button>
-                          <button 
-                            onClick={() => setSmartSuggestion(prev => ({ ...prev, visible: false }))}
-                            className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[11px] transition"
-                          >
-                            Dismiss
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={() => setSmartSuggestion(prev => ({ ...prev, visible: false }))}
-                      className="text-slate-500 hover:text-slate-300 p-1"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-
-                {/* ACTIVE TAB CONTENT ROUTER */}
-                <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
-                  {selectedAlbum ? (
-                    <AlbumDetailView 
-                      album={selectedAlbum} 
-                      mediaItems={mediaItems} 
-                      onBack={() => setSelectedAlbum(null)}
-                      onSelectMedia={(item) => setSelectedMedia(item)}
-                      favoriteIds={favoriteIds}
-                      onToggleFavorite={toggleFavorite}
-                    />
-                  ) : selectedPerson ? (
-                    <PersonDetailView 
-                      person={selectedPerson} 
-                      mediaItems={mediaItems} 
-                      onBack={() => setSelectedPerson(null)}
-                      onSelectMedia={(item) => setSelectedMedia(item)}
-                      onRenamePerson={handleRenamePerson}
-                    />
-                  ) : (
-                    <>
-                      {activeTab === 'home' && (
-                        <HomeScreen 
-                          albums={AUTOMATIC_ALBUMS} 
-                          mediaItems={mediaItems}
-                          onOpenAlbum={(alb) => setSelectedAlbum(alb)}
-                          onRescan={startScanningProcess}
-                        />
-                      )}
-                      {activeTab === 'people' && (
-                        <PeopleScreen 
-                          people={people} 
-                          onSelectPerson={(p) => setSelectedPerson(p)}
-                        />
-                      )}
-                      {activeTab === 'places' && (
-                        <PlacesScreen 
-                          mediaItems={mediaItems}
-                          onSelectMedia={(item) => setSelectedMedia(item)}
-                        />
-                      )}
-                      {activeTab === 'search' && (
-                        <SearchScreen 
-                          mediaItems={mediaItems}
-                          searchQuery={searchQuery}
-                          setSearchQuery={setSearchQuery}
-                          onSelectMedia={(item) => setSelectedMedia(item)}
-                        />
-                      )}
-                      {activeTab === 'cleanup' && (
-                        <CleanupScreen 
-                          mediaItems={mediaItems}
-                          storageSaved={totalStorageSaved}
-                          onDeleteItem={handleDeleteItem}
-                          onSelectMedia={(item) => setSelectedMedia(item)}
-                        />
-                      )}
-                      {activeTab === 'settings' && (
-                        <SettingsScreen 
-                          onResetFacialData={() => {
-                            setPeople([]);
-                            showToast('Facial recognition data cleared!');
-                          }}
-                          onRescanAll={startScanningProcess}
-                        />
-                      )}
-                    </>
-                  )}
-                </div>
-
-                {/* BOTTOM NAVIGATION BAR */}
-                <nav className={`border-t ${theme === 'dark' ? 'bg-slate-950/95 border-slate-800' : 'bg-slate-50 border-slate-200'} backdrop-blur-lg px-2 py-2 flex items-center justify-around z-30`}>
-                  <NavButton 
-                    icon={Grid} 
-                    label="Albums" 
-                    active={activeTab === 'home' && !selectedAlbum && !selectedPerson} 
-                    onClick={() => { setActiveTab('home'); setSelectedAlbum(null); setSelectedPerson(null); }} 
-                  />
-                  <NavButton 
-                    icon={Users} 
-                    label="People" 
-                    active={activeTab === 'people' && !selectedPerson} 
-                    onClick={() => { setActiveTab('people'); setSelectedPerson(null); setSelectedAlbum(null); }} 
-                  />
-                  <NavButton 
-                    icon={MapPin} 
-                    label="Places" 
-                    active={activeTab === 'places'} 
-                    onClick={() => { setActiveTab('places'); setSelectedAlbum(null); setSelectedPerson(null); }} 
-                  />
-                  <NavButton 
-                    icon={Search} 
-                    label="Search" 
-                    active={activeTab === 'search'} 
-                    onClick={() => { setActiveTab('search'); setSelectedAlbum(null); setSelectedPerson(null); }} 
-                  />
-                  <NavButton 
-                    icon={Trash2} 
-                    label="Cleanup" 
-                    badge={mediaItems.filter(m => m.quality.isBlurry || m.quality.isDuplicate).length}
-                    active={activeTab === 'cleanup'} 
-                    onClick={() => { setActiveTab('cleanup'); setSelectedAlbum(null); setSelectedPerson(null); }} 
-                  />
-                  <NavButton 
-                    icon={Settings} 
-                    label="Settings" 
-                    active={activeTab === 'settings'} 
-                    onClick={() => { setActiveTab('settings'); setSelectedAlbum(null); setSelectedPerson(null); }} 
-                  />
-                </nav>
-
-              </div>
-            )}
-
-            {/* FULLSCREEN MEDIA VIEWER MODAL */}
-            {selectedMedia && (
-              <MediaViewerModal 
-                media={selectedMedia} 
-                onClose={() => setSelectedMedia(null)}
-                isFavorite={favoriteIds.has(selectedMedia.id)}
-                onToggleFavorite={(e) => toggleFavorite(selectedMedia.id, e)}
-                onDelete={() => handleDeleteItem(selectedMedia.id)}
-              />
-            )}
-
-          </div>
-        </main>
-      )}
-
-    </div>
-  );
-}
-
-// ==========================================
-// SUB-COMPONENTS & SCREENS
-// ==========================================
-
-function NavButton({ icon: Icon, label, active, onClick, badge }) {
-  return (
-    <button 
-      onClick={onClick}
-      className={`relative flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all ${active ? 'text-rose-500 font-bold scale-105' : 'text-slate-400 hover:text-slate-200 font-normal'}`}
-    >
-      <div className="relative">
-        <Icon className={`w-5 h-5 ${active ? 'stroke-[2.5]' : 'stroke-2'}`} />
-        {badge > 0 && (
-          <span className="absolute -top-1.5 -right-2 bg-rose-600 text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center border-2 border-slate-950">
-            {badge}
-          </span>
-        )}
-      </div>
-      <span className="text-[10px] mt-1 tracking-tight">{label}</span>
-    </button>
-  );
-}
-
-// ONBOARDING & AI SCANNER
-function OnboardingScreen({ isScanning, scanProgress, scanStatusText, onStartScan }) {
-  return (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-slate-900 via-slate-950 to-indigo-950 text-white relative">
-      <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-500 via-rose-500 to-indigo-600 flex items-center justify-center mb-6 shadow-2xl shadow-rose-500/30 animate-pulse">
-        <Sparkles className="w-10 h-10 text-white" />
-      </div>
-
-      <h2 className="text-2xl font-black bg-gradient-to-r from-amber-200 via-rose-200 to-indigo-200 bg-clip-text text-transparent mb-2">
-        Welcome to Flexigallery
-      </h2>
-      <p className="text-xs text-slate-300 max-w-xs mb-8 leading-relaxed">
-        Your effortless smart gallery. We automatically organize your photos and videos by people, places, animals, events, and more.
-      </p>
-
-      {/* PRIVACY PROMISE CARDS */}
-      <div className="w-full space-y-3 mb-8 text-left">
-        <div className="p-3 bg-slate-900/80 border border-slate-800 rounded-2xl flex items-center space-x-3">
-          <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-xl">
-            <Cpu className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="text-xs font-bold text-slate-100">On-Device Processing</h4>
-            <p className="text-[11px] text-slate-400">No photos leave your phone. All AI processing runs locally.</p>
-          </div>
-        </div>
-
-        <div className="p-3 bg-slate-900/80 border border-slate-800 rounded-2xl flex items-center space-x-3">
-          <div className="p-2 bg-indigo-500/20 text-indigo-400 rounded-xl">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="text-xs font-bold text-slate-100">Zero Cloud Without Permission</h4>
-            <p className="text-[11px] text-slate-400">Your data and facial profiles remain strictly under your control.</p>
-          </div>
-        </div>
-      </div>
-
-      {/* SCANNING CONTROLS */}
-      {isScanning ? (
-        <div className="w-full bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
-          <div className="flex justify-between items-center text-xs font-semibold text-rose-300">
-            <span>Analyzing Gallery...</span>
-            <span>{scanProgress}%</span>
-          </div>
-          <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
-            <div 
-              className="bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-500 h-full transition-all duration-300"
-              style={{ width: `${scanProgress}%` }}
-            ></div>
-          </div>
-          <p className="text-[11px] text-slate-400 animate-pulse font-mono">{scanStatusText}</p>
-        </div>
-      ) : (
-        <button
-          onClick={onStartScan}
-          className="w-full py-3.5 bg-gradient-to-r from-rose-600 via-rose-500 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white font-bold rounded-2xl shadow-xl shadow-rose-600/30 flex items-center justify-center space-x-2 transition transform active:scale-95"
-        >
-          <Sparkles className="w-5 h-5" />
-          <span>Scan My Gallery</span>
-        </button>
-      )}
-    </div>
-  );
-}
-
-// HOME SCREEN: SMART ALBUMS GRID
-function HomeScreen({ albums, mediaItems, onOpenAlbum, onRescan }) {
-  const [filterCategory, setFilterCategory] = useState('All');
-
-  const filteredAlbums = useMemo(() => {
-    if (filterCategory === 'All') return albums;
-    return albums.filter(a => a.name.includes(filterCategory) || filterCategory === 'Media');
-  }, [albums, filterCategory]);
-
-  return (
-    <div className="space-y-4">
-      {/* HEADER SECTION */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-bold">Smart Albums</h2>
-          <p className="text-xs text-slate-400">{mediaItems.length} media items automatically organized</p>
-        </div>
-        <button 
-          onClick={onRescan} 
-          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 text-xs flex items-center gap-1"
-          title="Re-scan Gallery"
-        >
-          <RefreshCw className="w-3.5 h-3.5 text-rose-400" />
-        </button>
-      </div>
-
-      {/* QUICK CATEGORY FILTERS */}
-      <div className="flex space-x-2 overflow-x-auto pb-1 no-scrollbar text-xs">
-        {['All', 'People', 'Pets', 'Places', 'Events', 'Videos'].map(cat => (
-          <button
-            key={cat}
-            onClick={() => setFilterCategory(cat)}
-            className={`px-3 py-1.5 rounded-xl whitespace-nowrap transition-all ${filterCategory === cat ? 'bg-rose-600 text-white font-semibold shadow' : 'bg-slate-800/80 text-slate-400 hover:text-white'}`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* ALBUMS GRID */}
-      <div className="grid grid-cols-2 gap-3">
-        {filteredAlbums.map(alb => {
-          const Icon = alb.icon;
-          // Count matching items
-          const matchingItems = mediaItems.filter(m => m.smartAlbums.includes(alb.name));
-          const coverMedia = matchingItems[0]?.url || 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=400&q=80';
-
-          return (
-            <div
-              key={alb.id}
-              onClick={() => onOpenAlbum(alb)}
-              className="group cursor-pointer rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden hover:border-rose-500/50 transition-all duration-200 flex flex-col justify-between shadow-md relative"
-            >
-              {/* COVER IMAGE WITH GRADIENT OVERLAY */}
-              <div className="h-28 w-full relative overflow-hidden bg-slate-950">
-                <img 
-                  src={coverMedia} 
-                  alt={alb.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/30"></div>
-                
-                {/* ICON BADGE */}
-                <div className={`absolute top-2 left-2 p-1.5 rounded-xl bg-gradient-to-r ${alb.color} text-white shadow-md`}>
-                  <Icon className="w-4 h-4" />
-                </div>
-
-                {/* ITEM COUNT BADGE */}
-                <span className="absolute top-2 right-2 bg-slate-950/80 text-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-700 backdrop-blur-md">
-                  {matchingItems.length} items
-                </span>
-              </div>
-
-              {/* ALBUM INFO */}
-              <div className="p-2.5">
-                <h3 className="text-xs font-bold text-slate-100 group-hover:text-rose-400 transition">{alb.name}</h3>
-                <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">{alb.description}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-// ALBUM DETAIL VIEW
-function AlbumDetailView({ album, mediaItems, onBack, onSelectMedia, favoriteIds, onToggleFavorite }) {
-  const Icon = album.icon;
-  const items = mediaItems.filter(m => m.smartAlbums.includes(album.name));
-  const [filterType, setFilterType] = useState('all'); // 'all' | 'photo' | 'video'
-
-  const filteredItems = items.filter(m => {
-    if (filterType === 'photo') return m.type === 'photo';
-    if (filterType === 'video') return m.type === 'video';
-    return true;
-  });
-
-  return (
-    <div className="space-y-3">
-      {/* HEADER NAVBAR */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-        <button onClick={onBack} className="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-200">
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <div className="flex items-center space-x-2">
-          <div className={`p-1.5 rounded-xl bg-gradient-to-r ${album.color} text-white`}>
-            <Icon className="w-4 h-4" />
-          </div>
-          <h2 className="text-sm font-bold">{album.name}</h2>
-          <span className="text-xs text-slate-400">({filteredItems.length})</span>
-        </div>
-        <button className="p-1.5 bg-slate-800 text-slate-400 hover:text-white rounded-xl">
-          <MoreVertical className="w-4 h-4" />
-        </button>
-      </div>
-
-      {/* TYPE FILTER PILLS */}
-      <div className="flex space-x-2 text-xs">
-        <button
-          onClick={() => setFilterType('all')}
-          className={`px-3 py-1 rounded-lg ${filterType === 'all' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-400'}`}
-        >
-          All ({items.length})
-        </button>
-        <button
-          onClick={() => setFilterType('photo')}
-          className={`px-3 py-1 rounded-lg ${filterType === 'photo' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-400'}`}
-        >
-          Photos ({items.filter(i => i.type === 'photo').length})
-        </button>
-        <button
-          onClick={() => setFilterType('video')}
-          className={`px-3 py-1 rounded-lg ${filterType === 'video' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-400'}`}
-        >
-          Videos ({items.filter(i => i.type === 'video').length})
-        </button>
-      </div>
-
-      {/* MEDIA MASONRY / GRID */}
-      {filteredItems.length === 0 ? (
-        <div className="py-12 text-center text-slate-500 text-xs">
-          No media found in this filter.
-        </div>
-      ) : (
-        <div className="grid grid-cols-3 gap-1.5">
-          {filteredItems.map(item => (
-            <div
-              key={item.id}
-              onClick={() => onSelectMedia(item)}
-              className="relative aspect-square bg-slate-900 rounded-xl overflow-hidden cursor-pointer group border border-slate-800/60"
-            >
-              <img 
-                src={item.url} 
-                alt={item.title} 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-              />
-
-              {/* VIDEO BADGE */}
-              {item.type === 'video' && (
-                <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[9px] font-mono px-1.5 py-0.5 rounded flex items-center space-x-1 backdrop-blur-sm">
-                  <Play className="w-2.5 h-2.5 fill-current" />
-                  <span>{item.duration}</span>
-                </div>
-              )}
-
-              {/* FAVORITE BUTTON */}
-              <button
-                onClick={(e) => onToggleFavorite(item.id, e)}
-                className="absolute top-1 right-1 p-1 rounded-full bg-slate-950/60 text-slate-300 hover:text-rose-500"
-              >
-                <Heart className={`w-3 h-3 ${favoriteIds.has(item.id) ? 'text-rose-500 fill-rose-500' : ''}`} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// PEOPLE DEDICATED SCREEN (FACE CLUSTERING)
-function PeopleScreen({ people, onSelectPerson }) {
-  return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-bold">Faces & People</h2>
-        <p className="text-xs text-slate-400">Automatic facial recognition processed locally</p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        {people.map(person => (
-          <div
-            key={person.id}
-            onClick={() => onSelectPerson(person)}
-            className="p-3 bg-slate-900 border border-slate-800 rounded-2xl flex items-center space-x-3 cursor-pointer hover:border-rose-500/50 transition"
-          >
-            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-rose-500/40 relative bg-slate-800">
-              <img src={person.faceUrl} alt={person.name} className="w-full h-full object-cover" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-bold text-slate-100 truncate">{person.name}</h4>
-              <p className="text-[10px] text-slate-400">{person.count} photos found</p>
-              <span className="inline-block mt-1 text-[9px] bg-slate-800 text-rose-300 px-1.5 py-0.5 rounded-full border border-slate-700">
-                {person.relation}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// PERSON DETAIL VIEW WITH RENAME FEATURE
-function PersonDetailView({ person, mediaItems, onBack, onSelectMedia, onRenamePerson }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [nameInput, setNameInput] = useState(person.name);
-
-  const personPhotos = mediaItems.filter(m => m.people.includes(person.name));
-
-  const handleSaveName = () => {
-    onRenamePerson(person.id, nameInput);
-    setIsEditing(false);
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-        <button onClick={onBack} className="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-200">
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-
-        <div className="flex items-center space-x-3">
-          <img src={person.faceUrl} alt={person.name} className="w-8 h-8 rounded-full border border-rose-500" />
-          {isEditing ? (
-            <div className="flex items-center space-x-1">
-              <input
-                type="text"
-                value={nameInput}
-                onChange={(e) => setNameInput(e.target.value)}
-                className="bg-slate-800 text-xs text-white px-2 py-1 rounded border border-slate-700 w-32"
-                autoFocus
-              />
-              <button onClick={handleSaveName} className="p-1 bg-emerald-600 rounded text-white text-xs">
-                <Check className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center space-x-1.5">
-              <h2 className="text-sm font-bold">{person.name}</h2>
-              <button onClick={() => setIsEditing(true)} className="text-slate-400 hover:text-white p-1">
-                <Tag className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
-        </div>
-
-        <span className="text-xs text-slate-400">{personPhotos.length} photos</span>
-      </div>
-
-      <div className="grid grid-cols-3 gap-1.5">
-        {personPhotos.map(item => (
-          <div
-            key={item.id}
-            onClick={() => onSelectMedia(item)}
-            className="aspect-square bg-slate-900 rounded-xl overflow-hidden cursor-pointer"
-          >
-            <img src={item.url} alt={item.title} className="w-full h-full object-cover" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// PLACES & MAP VIEW SCREEN
-function PlacesScreen({ mediaItems, onSelectMedia }) {
-  const [activeTerrain, setActiveTerrain] = useState('All');
-
-  // Filter media with GPS / Terrain
-  const locations = useMemo(() => {
-    return Array.from(new Set(mediaItems.map(m => m.location)));
-  }, [mediaItems]);
-
-  const filteredMedia = mediaItems.filter(m => {
-    if (activeTerrain === 'All') return true;
-    return m.terrain === activeTerrain;
-  });
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-bold">Places & Scenery</h2>
-        <p className="text-xs text-slate-400">Geographic grouping by GPS and environment type</p>
-      </div>
-
-      {/* INTERACTIVE SIMULATED MAP */}
-      <div className="w-full h-44 rounded-2xl bg-slate-900 border border-slate-800 relative overflow-hidden flex flex-col justify-between p-3">
-        {/* Map grid lines background simulation */}
-        <div className="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px] opacity-40"></div>
-        
-        <div className="relative z-10 flex justify-between items-center">
-          <span className="bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-mono text-emerald-400 border border-slate-700 flex items-center gap-1">
-            <Map className="w-3 h-3" /> {locations.length} Tracked Cities
-          </span>
-        </div>
-
-        {/* SIMULATED MAP PINS */}
-        <div className="relative z-10 flex justify-around items-center my-auto">
-          <div className="flex flex-col items-center animate-bounce">
-            <div className="bg-rose-600 text-white p-1 rounded-full shadow-lg">
-              <MapPin className="w-4 h-4" />
-            </div>
-            <span className="text-[9px] bg-slate-950/90 text-slate-200 px-1.5 py-0.5 rounded mt-0.5 border border-slate-800">
-              Rio (2)
-            </span>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <div className="bg-indigo-600 text-white p-1 rounded-full shadow-lg">
-              <MapPin className="w-4 h-4" />
-            </div>
-            <span className="text-[9px] bg-slate-950/90 text-slate-200 px-1.5 py-0.5 rounded mt-0.5 border border-slate-800">
-              São Paulo (4)
-            </span>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <div className="bg-amber-600 text-white p-1 rounded-full shadow-lg">
-              <MapPin className="w-4 h-4" />
-            </div>
-            <span className="text-[9px] bg-slate-950/90 text-slate-200 px-1.5 py-0.5 rounded mt-0.5 border border-slate-800">
-              Florianópolis (1)
-            </span>
-          </div>
-        </div>
-
-        <div className="relative z-10 text-[10px] text-slate-400 text-right">
-          Extracted EXIF GPS Metadata
-        </div>
-      </div>
-
-      {/* TERRAIN FILTERS */}
-      <div className="flex space-x-2 text-xs">
-        {['All', 'Beach', 'Mountain', 'City', 'Home'].map(t => (
-          <button
-            key={t}
-            onClick={() => setActiveTerrain(t)}
-            className={`px-3 py-1 rounded-lg ${activeTerrain === t ? 'bg-rose-600 text-white font-semibold' : 'bg-slate-800 text-slate-400'}`}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
-
-      {/* MEDIA GRID */}
-      <div className="grid grid-cols-3 gap-1.5">
-        {filteredMedia.map(item => (
-          <div
-            key={item.id}
-            onClick={() => onSelectMedia(item)}
-            className="aspect-square bg-slate-900 rounded-xl overflow-hidden cursor-pointer relative group"
-          >
-            <img src={item.url} alt={item.title} className="w-full h-full object-cover" />
-            <div className="absolute bottom-1 left-1 bg-black/60 text-[8px] text-white px-1 py-0.5 rounded backdrop-blur-sm truncate max-w-[90%]">
-              {item.location.split(',')[0]}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// NATURAL LANGUAGE SEARCH SCREEN
-function SearchScreen({ mediaItems, searchQuery, setSearchQuery, onSelectMedia }) {
-  const suggestions = [
-    'dog photos at the beach',
-    '2024 documents',
-    'restaurant food',
-    'lucas selfie',
-    'long travel video'
-  ];
-
-  const searchResults = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    const q = searchQuery.toLowerCase();
-    return mediaItems.filter(item => {
-      const matchTag = item.tags.some(t => t.toLowerCase().includes(q));
-      const matchTitle = item.title.toLowerCase().includes(q);
-      const matchLocation = item.location.toLowerCase().includes(q);
-      const matchPeople = item.people.some(p => p.toLowerCase().includes(q));
-      const matchCategory = item.category.toLowerCase().includes(q);
-      return matchTag || matchTitle || matchLocation || matchPeople || matchCategory;
-    });
-  }, [searchQuery, mediaItems]);
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-bold">Smart NLP Search</h2>
-        <p className="text-xs text-slate-400">Search by natural text, dates, names, and places</p>
-      </div>
-
-      {/* SEARCH INPUT BAR */}
-      <div className="relative">
-        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder='e.g., "dog at the beach in 2024"...'
-          className="w-full bg-slate-900 border border-slate-800 text-white placeholder-slate-500 rounded-2xl pl-9 pr-8 py-2.5 text-xs focus:outline-none focus:border-rose-500"
-        />
-        {searchQuery && (
-          <button onClick={() => setSearchQuery('')} className="absolute right-3 top-3 text-slate-400">
-            <X className="w-3.5 h-3.5" />
-          </button>
-        )}
-      </div>
-
-      {/* SUGGESTION CHIPS */}
-      {!searchQuery && (
-        <div className="space-y-2">
-          <p className="text-[11px] text-slate-400 font-semibold">Search suggestions:</p>
-          <div className="flex flex-wrap gap-1.5">
-            {suggestions.map((sug, i) => (
-              <button
-                key={i}
-                onClick={() => setSearchQuery(sug)}
-                className="px-2.5 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-xl text-[11px] border border-slate-700/60 transition"
-              >
-                🔍 {sug}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* SEARCH RESULTS */}
-      {searchQuery && (
-        <div>
-          <div className="flex justify-between items-center mb-2">
-            <p className="text-xs text-slate-400">Results found: <span className="text-white font-bold">{searchResults.length}</span></p>
-          </div>
-
-          {searchResults.length === 0 ? (
-            <div className="py-12 text-center text-slate-500 text-xs">
-              No media matching the search "{searchQuery}".
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-1.5">
-              {searchResults.map(item => (
-                <div
-                  key={item.id}
-                  onClick={() => onSelectMedia(item)}
-                  className="aspect-square bg-slate-900 rounded-xl overflow-hidden cursor-pointer"
-                >
-                  <img src={item.url} alt={item.title} className="w-full h-full object-cover" />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// CLEANUP & DUPLICATE SUGGESTIONS SCREEN
-function CleanupScreen({ mediaItems, storageSaved, onDeleteItem, onSelectMedia }) {
-  const messyItems = mediaItems.filter(m => m.quality.isBlurry || m.quality.isDuplicate);
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-bold">Cleanup Suggestions</h2>
-        <p className="text-xs text-slate-400">Save storage space by removing blurry and duplicate photos</p>
-      </div>
-
-      {/* STORAGE SAVINGS BANNER */}
-      <div className="p-4 bg-gradient-to-r from-rose-900/50 via-slate-900 to-slate-900 border border-rose-500/30 rounded-2xl flex items-center justify-between">
-        <div className="space-y-0.5">
-          <span className="text-[10px] text-rose-300 font-semibold uppercase tracking-wider">Space to be freed</span>
-          <div className="text-xl font-black text-white">{storageSaved} MB</div>
-          <p className="text-[10px] text-slate-400">{messyItems.length} files suggested for deletion</p>
-        </div>
-        <div className="p-3 bg-rose-600/20 text-rose-400 rounded-2xl">
-          <HardDrive className="w-6 h-6" />
-        </div>
-      </div>
-
-      {/* CLEANUP ITEMS LIST */}
-      {messyItems.length === 0 ? (
-        <div className="py-12 text-center text-slate-500 text-xs">
-          🎉 Your gallery is completely clean and organized!
-        </div>
-      ) : (
-        <div className="space-y-2.5">
-          {messyItems.map(item => (
-            <div
-              key={item.id}
-              className="p-2.5 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-between gap-3"
-            >
-              <div 
-                onClick={() => onSelectMedia(item)}
-                className="w-14 h-14 rounded-xl bg-slate-950 overflow-hidden shrink-0 cursor-pointer"
-              >
-                <img src={item.url} alt={item.title} className="w-full h-full object-cover" />
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center space-x-1.5">
-                  <span className="text-xs font-bold truncate">{item.title}</span>
-                </div>
-                <div className="flex items-center space-x-2 mt-1">
-                  {item.quality.isDuplicate && (
-                    <span className="text-[9px] bg-amber-950 text-amber-400 px-1.5 py-0.5 rounded border border-amber-800">
-                      Similar Photo
-                    </span>
-                  )}
-                  {item.quality.isBlurry && (
-                    <span className="text-[9px] bg-rose-950 text-rose-400 px-1.5 py-0.5 rounded border border-rose-800">
-                      Blurry
-                    </span>
-                  )}
-                  <span className="text-[10px] text-slate-400">{item.exif.size}</span>
-                </div>
-              </div>
-
-              <button
-                onClick={() => onDeleteItem(item.id)}
-                className="p-2 bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white rounded-xl transition"
-                title="Delete photo"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// SETTINGS & PRIVACY CONTROLS
-function SettingsScreen({ onResetFacialData, onRescanAll }) {
-  return (
-    <div className="space-y-4 text-xs">
-      <div>
-        <h2 className="text-lg font-bold">Settings & Privacy</h2>
-        <p className="text-xs text-slate-400">Guaranteed privacy and user data control</p>
-      </div>
-
-      <div className="p-3 bg-slate-900 border border-slate-800 rounded-2xl space-y-3">
-        <h3 className="font-bold text-slate-200 flex items-center gap-1.5">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" /> On-Device Privacy
-        </h3>
-        <p className="text-slate-400 text-[11px]">
-          All AI models (CoreML/ML Kit) run directly on your device's NPU processor. No biometric data or image files are ever transmitted to cloud servers.
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <button
-          onClick={onRescanAll}
-          className="w-full p-3 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-left rounded-2xl flex items-center justify-between text-slate-200"
-        >
-          <div className="flex items-center space-x-2">
-            <RefreshCw className="w-4 h-4 text-rose-400" />
-            <span>Re-scan entire gallery</span>
-          </div>
-          <ChevronRight className="w-4 h-4 text-slate-500" />
-        </button>
-
-        <button
-          onClick={onResetFacialData}
-          className="w-full p-3 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-left rounded-2xl flex items-center justify-between text-rose-400"
-        >
-          <div className="flex items-center space-x-2">
-            <Trash2 className="w-4 h-4" />
-            <span>Clear facial recognition database</span>
-          </div>
-          <ChevronRight className="w-4 h-4 text-slate-500" />
-        </button>
-      </div>
-
-      <div className="p-3 bg-slate-900/50 border border-slate-800/60 rounded-2xl text-[10px] text-slate-500 space-y-1">
-        <div>App Version: 1.0.0-MVP (Build 2026)</div>
-        <div>Local AI Engine: TensorFlow Lite v2.14 / MLKit Face Engine</div>
-      </div>
-    </div>
-  );
-}
-
-// FULLSCREEN MEDIA VIEWER MODAL WITH EXIF INFO
-function MediaViewerModal({ media, onClose, isFavorite, onToggleFavorite, onDelete }) {
-  const [showInfo, setShowInfo] = useState(false);
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between p-3 animate-fade-in">
-      {/* TOP CONTROLS */}
-      <div className="flex items-center justify-between text-white z-10">
-        <button onClick={onClose} className="p-2 bg-slate-900/80 rounded-full text-slate-300 hover:text-white">
-          <X className="w-5 h-5" />
-        </button>
-        <span className="text-xs font-semibold text-slate-300">{media.title}</span>
-        <button onClick={() => setShowInfo(!showInfo)} className={`p-2 rounded-full ${showInfo ? 'bg-rose-600 text-white' : 'bg-slate-900/80 text-slate-300'}`}>
-          <Info className="w-5 h-5" />
-        </button>
-      </div>
-
-      {/* MEDIA PREVIEW */}
-      <div className="flex-1 flex items-center justify-center my-2 relative overflow-hidden">
-        <img 
-          src={media.url} 
-          alt={media.title} 
-          className="max-h-full max-w-full object-contain rounded-xl shadow-2xl"
-        />
-
-        {/* DETECTED TAG OVERLAYS */}
-        <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
-          {media.smartAlbums.map((alb, i) => (
-            <span key={i} className="bg-slate-950/80 text-slate-200 text-[9px] px-2 py-0.5 rounded-full border border-slate-700 backdrop-blur-md">
-              #{alb}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* EXIF INFORMATION DRAWER */}
-      {showInfo && (
-        <div className="bg-slate-900/95 border border-slate-800 text-slate-200 p-3 rounded-2xl text-xs space-y-2 mb-2 animate-slide-up">
-          <h4 className="font-bold text-rose-400 border-b border-slate-800 pb-1">EXIF Metadata & AI Analysis</h4>
-          <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
-            <div><span className="text-slate-500">Camera:</span> {media.exif.camera}</div>
-            <div><span className="text-slate-500">Size:</span> {media.exif.size}</div>
-            <div><span className="text-slate-500">Resolution:</span> {media.exif.resolution}</div>
-            <div><span className="text-slate-500">Location:</span> {media.location}</div>
-            <div><span className="text-slate-500">Date:</span> {new Date(media.date).toLocaleDateString('en-US')}</div>
-            <div><span className="text-slate-500">AI Quality:</span> {Math.round(media.quality.score * 100)}%</div>
-          </div>
-          {media.people.length > 0 && (
-            <div className="text-[11px]">
-              <span className="text-slate-500">Detected People:</span> {media.people.join(', ')}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* BOTTOM ACTION BAR */}
-      <div className="flex items-center justify-around bg-slate-900/90 rounded-2xl p-2 border border-slate-800">
-        <button onClick={onToggleFavorite} className="flex flex-col items-center text-slate-300 hover:text-rose-500">
-          <Heart className={`w-5 h-5 ${isFavorite ? 'text-rose-500 fill-rose-500' : ''}`} />
-          <span className="text-[10px] mt-0.5">Favorite</span>
-        </button>
-
-        <button onClick={() => alert('Secure share link generated!')} className="flex flex-col items-center text-slate-300 hover:text-white">
-          <Share2 className="w-5 h-5" />
-          <span className="text-[10px] mt-0.5">Share</span>
-        </button>
-
-        <button onClick={onDelete} className="flex flex-col items-center text-rose-400 hover:text-rose-300">
-          <Trash2 className="w-5 h-5" />
-          <span className="text-[10px] mt-0.5">Delete</span>
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// DEVELOPER & REACT NATIVE ARCHITECTURE DOCUMENTATION VIEW
-function DevArchitectureView() {
-  const [activeCodeTab, setActiveCodeTab] = useState('structure');
-
-  return (
-    <div className="flex-1 max-w-4xl w-full mx-auto p-4 space-y-6">
-      <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-3">
-        <div className="flex items-center space-x-3">
-          <Code className="w-8 h-8 text-rose-500" />
-          <div>
-            <h2 className="text-xl font-bold text-white">Flexigallery — React Native & Machine Learning Architecture</h2>
-            <p className="text-xs text-slate-400">Technical implementation guide for iOS and Android</p>
-          </div>
-        </div>
-      </div>
-
-      {/* CODE VIEW TABS */}
-      <div className="flex space-x-2 border-b border-slate-800 pb-2 overflow-x-auto">
-        <button
-          onClick={() => setActiveCodeTab('structure')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${activeCodeTab === 'structure' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-400'}`}
-        >
-          1. Project Structure
-        </button>
-        <button
-          onClick={() => setActiveCodeTab('ml-engine')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${activeCodeTab === 'ml-engine' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-400'}`}
-        >
-          2. ML Classifier (TypeScript)
-        </button>
-        <button
-          onClick={() => setActiveCodeTab('database')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${activeCodeTab === 'database' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-400'}`}
-        >
-          3. SQLite Database
-        </button>
-        <button
-          onClick={() => setActiveCodeTab('instructions')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${activeCodeTab === 'instructions' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-400'}`}
-        >
-          4. Execution Instructions
-        </button>
-      </div>
-
-      {/* TAB 1: PROJECT STRUCTURE */}
-      {activeCodeTab === 'structure' && (
-        <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 font-mono text-xs text-slate-300 space-y-2">
-          <h3 className="font-sans text-sm font-bold text-rose-400 mb-2">Project File Tree (React Native / Expo CLI)</h3>
-          <pre className="bg-slate-950 p-4 rounded-xl overflow-x-auto text-emerald-400">
-{`flexigallery/
-├── assets/
-│   ├── models/
-│   │   ├── mobilenet_v3.tflite        # Object classification (Pets, Food, etc)
-│   │   └── face_embedding.tflite     # Face embeddings extraction (People)
-├── src/
-│   ├── components/
-│   │   ├── AlbumCard.tsx
-│   │   ├── MediaGrid.tsx
-│   │   ├── FullscreenViewer.tsx
-│   │   └── CleanupCard.tsx
-│   ├── services/
-│   │   ├── MLClassifierService.ts     # TensorFlow Lite / ML Kit Pipeline
-│   │   ├── FaceRecognitionService.ts  # Face clustering by Euclidean Distance
-│   │   ├── ExifExtractorService.ts   # Background GPS/Camera tag extraction
-│   │   └── DatabaseService.ts        # Local SQLite ORM
-│   ├── screens/
-│   │   ├── HomeScreen.tsx
-│   │   ├── PeopleScreen.tsx
-│   │   ├── PlacesMapScreen.tsx
-│   │   ├── SearchScreen.tsx
-│   │   └── CleanupScreen.tsx
-│   └── App.tsx
-├── package.json
-└── tsconfig.json`}
-          </pre>
-        </div>
-      )}
-
-      {/* TAB 2: ML CLASSIFIER SERVICE CODE */}
-      {activeCodeTab === 'ml-engine' && (
-        <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 font-mono text-xs text-slate-300 space-y-2">
-          <h3 className="font-sans text-sm font-bold text-rose-400 mb-2">src/services/MLClassifierService.ts</h3>
-          <pre className="bg-slate-950 p-4 rounded-xl overflow-x-auto text-sky-300">
-{`import { Tensor, Canvas } from 'react-native-fast-tflite';
-import * as ExifParser from 'react-native-exif-reader';
-
-export interface ClassificationResult {
-  category: string;
-  smartAlbums: string[];
-  qualityScore: number;
-  isBlurry: boolean;
-}
-
-export class MLClassifierService {
-  private static instance: MLClassifierService;
-
-  public async classifyMedia(imageUri: string): Promise<ClassificationResult> {
-    // 1. On-Device EXIF Extraction
-    const exifData = await ExifParser.readExif(imageUri);
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS & JS for Interactive Places Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    // 2. Sharpness Analysis (Laplacian Variance to detect blurry photos)
-    const blurScore = await this.calculateLaplacianVariance(imageUri);
-    const isBlurry = blurScore < 100.0;
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.4);
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.7);
+        }
+        #leaflet-map {
+            z-index: 10;
+        }
+        .pulse-privacy {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse-green 2s infinite;
+        }
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col">
 
-    // 3. Background Thread TFLite Inference
-    const smartAlbums: string[] = [];
-    if (exifData.DateTime) smartAlbums.push('Events');
-    if (exifData.GPSLatitude) smartAlbums.push('Places');
+    <!-- HEADER / TOP NAVIGATION BAR -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-slate-200 dark:border-slate-800 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            
+            <!-- Logo & Privacy Badge -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
+                    <i class="fa-solid font-bold fa-wand-magic-sparkles text-lg"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-brand-600 to-indigo-500 bg-clip-text text-transparent dark:from-brand-400 dark:to-indigo-300">
+                            Flexigallery
+                        </h1>
+                        <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-privacy"></span> On-Device AI
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Smart & Private Media Organizer</p>
+                </div>
+            </div>
 
-    return {
-      category: isBlurry ? 'Cleanup Suggestions' : 'General',
-      smartAlbums,
-      qualityScore: isBlurry ? 0.3 : 0.95,
-      isBlurry
-    };
-  }
+            <!-- Natural Language Search Bar -->
+            <div class="flex-1 max-w-md relative hidden md:block">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input 
+                    type="text" 
+                    id="global-search"
+                    placeholder="Search e.g. 'dog at beach in 2023', 'Mom sunset', 'receipts'..." 
+                    class="w-full pl-10 pr-10 py-2 text-sm bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100 placeholder-slate-400 transition"
+                    oninput="handleSearch(this.value)"
+                >
+                <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid fa-circle-xmark text-sm"></i>
+                </button>
+            </div>
 
-  private async calculateLaplacianVariance(uri: string): Promise<number> {
-    // Blur detection algorithm implementation
-    return 150.0; 
-  }
-}`}
-          </pre>
+            <!-- Right Action Controls -->
+            <div class="flex items-center gap-2">
+                <!-- Rescan Gallery Trigger -->
+                <button onclick="openScanModal()" title="Rescan gallery" class="p-2.5 rounded-full hover:bg-slate-200/60 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition relative">
+                    <i class="fa-solid fa-rotate text-sm"></i>
+                </button>
+
+                <!-- Light/Dark Mode Switcher -->
+                <button onclick="toggleDarkMode()" title="Toggle Theme" class="p-2.5 rounded-full hover:bg-slate-200/60 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition">
+                    <i class="fa-solid fa-moon dark:hidden text-sm"></i>
+                    <i class="fa-solid fa-sun hidden dark:block text-amber-400 text-sm"></i>
+                </button>
+
+                <!-- Dev Guide Drawer Button -->
+                <button onclick="switchTab('dev-guide')" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-200/70 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-medium transition text-slate-700 dark:text-slate-200">
+                    <i class="fa-solid fa-code text-brand-500"></i>
+                    <span>Dev Architecture</span>
+                </button>
+
+                <!-- Settings Modal Trigger -->
+                <button onclick="openSettingsModal()" class="p-2.5 rounded-full hover:bg-slate-200/60 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition" title="Settings & Privacy">
+                    <i class="fa-solid fa-gear text-sm"></i>
+                </button>
+            </div>
         </div>
-      )}
 
-      {/* TAB 3: SQLITE DATABASE SCHEMA */}
-      {activeCodeTab === 'database' && (
-        <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 font-mono text-xs text-slate-300 space-y-2">
-          <h3 className="font-sans text-sm font-bold text-rose-400 mb-2">Local SQLite Database Schema</h3>
-          <pre className="bg-slate-950 p-4 rounded-xl overflow-x-auto text-amber-300">
-{`CREATE TABLE IF NOT EXISTS media_items (
-  id TEXT PRIMARY KEY,
-  uri TEXT NOT NULL,
-  type TEXT CHECK(type IN ('photo', 'video')),
-  date_taken DATETIME,
-  latitude REAL,
-  longitude REAL,
-  location_name TEXT,
-  terrain_type TEXT,
-  quality_score REAL,
-  is_blurry INTEGER DEFAULT 0,
-  is_duplicate INTEGER DEFAULT 0
-);
-
-CREATE TABLE IF NOT EXISTS faces (
-  id TEXT PRIMARY KEY,
-  person_name TEXT DEFAULT 'Unknown Person',
-  embedding_vector BLOB NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS media_faces (
-  media_id TEXT,
-  face_id TEXT,
-  FOREIGN KEY(media_id) REFERENCES media_items(id),
-  FOREIGN KEY(face_id) REFERENCES faces(id)
-);`}
-          </pre>
+        <!-- Mobile Search Row -->
+        <div class="px-4 pb-3 md:hidden">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input 
+                    type="text" 
+                    id="global-search-mobile"
+                    placeholder="Search photos, people, places..." 
+                    class="w-full pl-10 pr-8 py-2 text-sm bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100 placeholder-slate-400"
+                    oninput="handleSearch(this.value)"
+                >
+            </div>
         </div>
-      )}
+    </header>
 
-      {/* TAB 4: RUNNING INSTRUCTIONS */}
-      {activeCodeTab === 'instructions' && (
-        <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 font-sans text-xs text-slate-300 space-y-4">
-          <h3 className="text-sm font-bold text-rose-400">Installation and Execution Guide</h3>
-          
-          <div className="space-y-2">
-            <h4 className="font-bold text-white">1. Prerequisites</h4>
-            <p className="text-slate-400">Node.js LTS, React Native CLI / Expo CLI, Xcode (for iOS), and Android Studio (for Android).</p>
-          </div>
-
-          <div className="space-y-2">
-            <h4 className="font-bold text-white">2. Create Project & Install Dependencies</h4>
-            <pre className="bg-slate-950 p-3 rounded-xl font-mono text-emerald-400">
-{`npx create-expo-app Flexigallery --template typescript
-cd Flexigallery
-npm install expo-media-library expo-sqlite react-native-fast-tflite lucide-react-native`}
-            </pre>
-          </div>
-
-          <div className="space-y-2">
-            <h4 className="font-bold text-white">3. Run on Emulators / Physical Devices</h4>
-            <pre className="bg-slate-950 p-3 rounded-xl font-mono text-sky-400">
-{`# For Android
-npx expo run:android
-
-# For iOS
-npx expo run:ios`}
-            </pre>
-          </div>
+    <!-- NAVIGATION TABS -->
+    <nav class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 transition-colors">
+        <div class="max-w-7xl mx-auto flex items-center gap-1 overflow-x-auto custom-scrollbar py-2 text-sm">
+            <button onclick="switchTab('home')" id="tab-btn-home" class="tab-btn active px-4 py-2 rounded-xl font-medium flex items-center gap-2 transition whitespace-nowrap bg-brand-500 text-white shadow-sm">
+                <i class="fa-solid fa-border-all"></i> Smart Albums
+            </button>
+            <button onclick="switchTab('people')" id="tab-btn-people" class="tab-btn px-4 py-2 rounded-xl font-medium flex items-center gap-2 transition whitespace-nowrap text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <i class="fa-solid fa-user-group"></i> People
+            </button>
+            <button onclick="switchTab('places')" id="tab-btn-places" class="tab-btn px-4 py-2 rounded-xl font-medium flex items-center gap-2 transition whitespace-nowrap text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <i class="fa-solid fa-map-location-dot"></i> Places & Map
+            </button>
+            <button onclick="switchTab('cleanup')" id="tab-btn-cleanup" class="tab-btn px-4 py-2 rounded-xl font-medium flex items-center gap-2 transition whitespace-nowrap text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <i class="fa-solid fa-broom text-amber-500"></i> Storage Cleanup
+                <span id="cleanup-badge" class="px-2 py-0.5 text-xs rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold">4</span>
+            </button>
+            <button onclick="switchTab('dev-guide')" id="tab-btn-dev-guide" class="tab-btn sm:hidden px-4 py-2 rounded-xl font-medium flex items-center gap-2 transition whitespace-nowrap text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <i class="fa-solid fa-code text-brand-500"></i> Dev Spec
+            </button>
         </div>
-      )}
+    </nav>
 
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 relative">
+
+        <!-- PRIVACY BANNER -->
+        <div id="privacy-banner" class="mb-6 bg-gradient-to-r from-emerald-900/10 via-emerald-800/5 to-transparent dark:from-emerald-950/40 border border-emerald-500/20 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-shield-halved text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">100% On-Device AI Processing</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">All facial recognition, scenery classification, and EXIF parsing occur locally on your device's Neural Engine. No photos leave your phone.</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0 text-xs">
+                <span class="text-slate-500 dark:text-slate-400 font-medium"><i class="fa-solid fa-microchip mr-1"></i> GPU Active</span>
+                <button onclick="document.getElementById('privacy-banner').remove()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SEARCH RESULT INFO BAR -->
+        <div id="search-info" class="hidden mb-6 flex items-center justify-between bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-900/50 rounded-2xl p-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-filter text-brand-500"></i>
+                <span class="text-sm text-slate-700 dark:text-slate-300">Active search query: <strong id="search-query-text" class="text-brand-600 dark:text-brand-400">""</strong></span>
+            </div>
+            <button onclick="clearSearch()" class="text-xs text-brand-600 dark:text-brand-400 hover:underline font-semibold">Clear Search</button>
+        </div>
+
+        <!-- VIEW 1: HOME / SMART ALBUMS GRID -->
+        <section id="view-home" class="view-section">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Automatic Smart Albums</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Organized into multi-attribute categories using embedded ML</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-500 dark:text-slate-400 font-medium" id="total-items-counter">24 items analyzed</span>
+                </div>
+            </div>
+
+            <!-- SMART SUGGESTION HERO PILL -->
+            <div class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-indigo-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-500 to-pink-500 text-white flex items-center justify-center shrink-0 shadow-md">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">AI Album Recommendation</span>
+                        <h4 class="text-sm font-semibold text-slate-900 dark:text-slate-100">"Weekend Beach Trip to Malibu"</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">5 photos and 1 slow-mo video detected between Nov 12 - Nov 14 with matching GPS coordinates.</p>
+                    </div>
+                </div>
+                <button onclick="createSuggestedAlbum()" class="px-3.5 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm transition shrink-0">
+                    <i class="fa-solid fa-folder-plus mr-1"></i> Create Album
+                </button>
+            </div>
+
+            <!-- Smart Albums Grid -->
+            <div id="albums-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Albums populated dynamically -->
+            </div>
+        </section>
+
+        <!-- VIEW 2: ALBUM DETAIL VIEW -->
+        <section id="view-album-detail" class="view-section hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div class="flex items-center gap-3">
+                    <button onclick="switchTab('home')" class="p-2.5 rounded-xl bg-slate-200/70 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <div>
+                        <h2 id="album-detail-title" class="text-2xl font-bold text-slate-900 dark:text-slate-100">Album Name</h2>
+                        <p id="album-detail-count" class="text-xs text-slate-500 dark:text-slate-400">0 items</p>
+                    </div>
+                </div>
+
+                <!-- Batch Selection Tools -->
+                <div class="flex items-center gap-2">
+                    <button id="multi-select-toggle" onclick="toggleMultiSelectMode()" class="px-3.5 py-2 rounded-xl bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-300 dark:hover:bg-slate-700 transition">
+                        <i class="fa-solid fa-check-square mr-1"></i> Select
+                    </button>
+                    <div id="batch-actions" class="hidden flex items-center gap-2">
+                        <span id="selected-count" class="text-xs font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-950/60 px-2.5 py-1.5 rounded-lg">0 selected</span>
+                        <button onclick="batchShare()" class="p-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-brand-500 hover:text-white transition text-xs" title="Share Selected">
+                            <i class="fa-solid fa-share-nodes"></i>
+                        </button>
+                        <button onclick="batchDelete()" class="p-2 rounded-xl bg-red-100 dark:bg-red-950/50 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white transition text-xs" title="Delete Selected">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Media Grid -->
+            <div id="album-media-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                <!-- Media cards injected here -->
+            </div>
+        </section>
+
+        <!-- VIEW 3: PEOPLE (FACIAL RECOGNITION CLUSTERS) -->
+        <section id="view-people" class="view-section hidden">
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">People & Face Recognition</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Faces automatically clustered using ML Kit 128-dimensional vector embeddings</p>
+                </div>
+                <button onclick="showToast('Facial recognition re-indexed successfully.')" class="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-300">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Re-cluster Faces
+                </button>
+            </div>
+
+            <div id="people-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <!-- People cards dynamically rendered -->
+            </div>
+        </section>
+
+        <!-- VIEW 4: PLACES & MAP (LEAFLET INTERACTIVE MAP) -->
+        <section id="view-places" class="view-section hidden">
+            <div class="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Explore Locations (GPS EXIF Map)</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Interactive map showing photos clustered by geographical location tags</p>
+                </div>
+                <div class="flex items-center gap-1.5 overflow-x-auto py-1">
+                    <button onclick="filterMapLocation('all')" class="px-3 py-1.5 rounded-lg bg-brand-500 text-white text-xs font-semibold whitespace-nowrap">All Places</button>
+                    <button onclick="filterMapLocation('Malibu')" class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-300 whitespace-nowrap">Malibu</button>
+                    <button onclick="filterMapLocation('Paris')" class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-300 whitespace-nowrap">Paris</button>
+                    <button onclick="filterMapLocation('Tokyo')" class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-300 whitespace-nowrap">Tokyo</button>
+                </div>
+            </div>
+
+            <!-- Leaflet Container -->
+            <div class="w-full h-[420px] rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-lg relative">
+                <div id="leaflet-map" class="w-full h-full"></div>
+            </div>
+
+            <div class="mt-6">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3" id="map-photos-title">Geotagged Media Highlights</h3>
+                <div id="map-photos-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                    <!-- Geotagged media previews -->
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 5: CLEANUP & STORAGE OPTIMIZER -->
+        <section id="view-cleanup" class="view-section hidden">
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Smart Storage Optimizer</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">AI-detected duplicate shots, blurry frames, and underexposed photos</p>
+                </div>
+                <div class="bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-2xl flex items-center gap-3">
+                    <i class="fa-solid fa-database text-amber-500 text-lg"></i>
+                    <div>
+                        <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block">Recoverable Space</span>
+                        <span id="cleanable-space" class="text-sm font-bold text-amber-600 dark:text-amber-400">1.42 GB Recoverable</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Filters -->
+            <div class="flex gap-2 mb-6 border-b border-slate-200 dark:border-slate-800 pb-3">
+                <button onclick="filterCleanupCategory('all')" id="clean-tab-all" class="clean-tab active px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-brand-500 text-white">All Suggestions (4)</button>
+                <button onclick="filterCleanupCategory('duplicate')" id="clean-tab-duplicate" class="clean-tab px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">Duplicates (2)</button>
+                <button onclick="filterCleanupCategory('blurry')" id="clean-tab-blurry" class="clean-tab px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">Blurry (1)</button>
+                <button onclick="filterCleanupCategory('dark')" id="clean-tab-dark" class="clean-tab px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">Underexposed (1)</button>
+            </div>
+
+            <!-- Cleanup Cards Grid -->
+            <div id="cleanup-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Cleanup item cards dynamically populated -->
+            </div>
+        </section>
+
+        <!-- VIEW 6: DEVELOPER ARCHITECTURE & CODE SPECIFICATION GUIDE -->
+        <section id="view-dev-guide" class="view-section hidden">
+            <div class="mb-6">
+                <div class="flex items-center gap-2 text-brand-600 dark:text-brand-400 text-xs font-bold uppercase tracking-wider mb-1">
+                    <i class="fa-solid fa-code-branch"></i> Mobile Software Architecture Specification
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Flexigallery Technical Documentation</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Complete reference for implementing Flexigallery in React Native or Flutter with On-Device Machine Learning.</p>
+            </div>
+
+            <!-- 3 Column Tech Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <!-- Column 1: Project Folder Structure -->
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-folder-tree"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 dark:text-slate-100 text-sm">1. React Native / Flutter Tree</h3>
+                    </div>
+                    <pre class="bg-slate-950 text-slate-300 p-3.5 rounded-2xl text-[11px] font-mono overflow-x-auto leading-relaxed custom-scrollbar">src/
+├── assets/
+│   └── models/               # TFLite MobileNet models
+├── components/
+│   ├── AlbumCard.tsx
+│   ├── MediaViewerModal.tsx
+│   └── LeafletMapView.tsx
+├── services/
+│   ├── ml/
+│   │   ├── FaceDetector.ts   # ML Kit Face Detection
+│   │   ├── ObjectClassifier.ts# MobileNetV3 / CoreML
+│   │   └── DBSCANClustering.ts# Embeddings Similarity
+│   ├── database/
+│   │   ├── schema.ts         # SQLite / Realm Schema
+│   │   └── MediaRepository.ts
+│   └── ExifExtractor.ts      # GPS & EXIF Parser
+└── screens/
+    ├── HomeScreen.tsx
+    ├── PeopleScreen.tsx
+    ├── MapScreen.tsx
+    └── CleanupScreen.tsx</pre>
+                </div>
+
+                <!-- Column 2: ML Pipeline & Clustering -->
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 dark:text-slate-100 text-sm">2. On-Device ML Pipeline</h3>
+                    </div>
+                    <div class="space-y-3 text-xs text-slate-600 dark:text-slate-300">
+                        <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+                            <strong class="text-brand-600 dark:text-brand-400 block mb-1">Face Recognition:</strong>
+                            Uses <code>@react-native-ml-kit/face-detection</code> or Google ML Kit Flutter package to output 128-d vector embeddings.
+                        </div>
+                        <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+                            <strong class="text-brand-600 dark:text-brand-400 block mb-1">DBSCAN Clustering:</strong>
+                            Calculates Cosine Distance between embeddings. Distance &le; 0.38 auto-clusters photos into a single person profile.
+                        </div>
+                        <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+                            <strong class="text-brand-600 dark:text-brand-400 block mb-1">Scene & Object Classifier:</strong>
+                            Runs EfficientNet-Lite4 via TensorFlow Lite (Android) and CoreML (iOS) for scene tags (Beach, Food, Pet, Document).
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 3: CLI Commands & Execution -->
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-terminal"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 dark:text-slate-100 text-sm">3. CLI Setup Instructions</h3>
+                    </div>
+                    <div class="text-xs space-y-2 text-slate-600 dark:text-slate-300">
+                        <p class="font-medium text-slate-900 dark:text-slate-100">Build and launch local development target:</p>
+                        <ol class="list-decimal pl-4 space-y-1 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
+                            <li>git clone https://github.com/flexigallery/app.git</li>
+                            <li>cd flexigallery && npm install</li>
+                            <li>npx pod-install ios</li>
+                            <li>npx react-native run-ios</li>
+                            <li>npx react-native run-android</li>
+                        </ol>
+                        <div class="mt-4 p-3 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[11px]">
+                            <i class="fa-solid fa-shield-check mr-1"></i>
+                            <strong>Permissions Guard:</strong> Requires <code>READ_MEDIA_IMAGES</code> on Android 13+ and <code>NSPhotoLibraryUsageDescription</code> on iOS.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL 1: INITIAL AI GALLERY SCANNER SIMULATOR -->
+    <div id="modal-scan" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md hidden transition-opacity">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative overflow-hidden">
+            <div class="text-center space-y-4">
+                <div class="w-16 h-16 rounded-3xl bg-brand-500/10 text-brand-500 flex items-center justify-center mx-auto text-2xl animate-bounce">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100">Scanning On-Device Gallery</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Analyzing faces, scenery, EXIF GPS tags, and low quality shots without cloud uploads.</p>
+                </div>
+
+                <!-- Live Animated Progress Bar -->
+                <div class="space-y-2 pt-2">
+                    <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400 font-medium">
+                        <span id="scan-status-text">Parsing EXIF metadata...</span>
+                        <span id="scan-percentage">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-3 overflow-hidden p-0.5">
+                        <div id="scan-progress-bar" class="bg-gradient-to-r from-brand-600 to-emerald-400 h-full rounded-full transition-all duration-300 w-0"></div>
+                    </div>
+                    <p id="scan-items-count" class="text-[11px] text-slate-400">0 of 24 media items processed</p>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs">
+                    <span class="text-emerald-500 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-shield-check"></i> Private Processing
+                    </span>
+                    <button onclick="closeScanModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition">
+                        Run in Background
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-  );
-}
+
+    <!-- MODAL 2: FULLSCREEN MEDIA LIGHTBOX & EXIF INSPECTOR -->
+    <div id="modal-viewer" class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-slate-950/90 backdrop-blur-xl hidden transition-opacity">
+        <button onclick="closeViewerModal()" class="absolute top-4 right-4 z-50 w-10 h-10 rounded-full bg-slate-800/80 text-white hover:bg-slate-700 flex items-center justify-center transition">
+            <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+
+        <div class="w-full h-full max-w-6xl bg-slate-900 border border-slate-800 rounded-none sm:rounded-3xl overflow-hidden flex flex-col md:flex-row shadow-2xl">
+            <!-- Media Preview Area -->
+            <div class="flex-1 bg-black flex items-center justify-center relative min-h-[300px]">
+                <img id="viewer-img" src="" alt="" class="max-h-full max-w-full object-contain">
+                <div id="viewer-video-badge" class="hidden absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                    <i class="fa-solid fa-play"></i> VIDEO MEDIA
+                </div>
+                
+                <!-- Prev / Next Controls -->
+                <button onclick="navigateViewer(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-800/70 hover:bg-slate-700 text-white flex items-center justify-center">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button onclick="navigateViewer(1)" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-800/70 hover:bg-slate-700 text-white flex items-center justify-center">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- EXIF Inspector Side Panel -->
+            <div class="w-full md:w-80 bg-slate-900 border-t md:border-t-0 md:border-l border-slate-800 p-5 flex flex-col justify-between text-slate-200 overflow-y-auto custom-scrollbar">
+                <div class="space-y-4">
+                    <div>
+                        <span id="viewer-category-tag" class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-400 border border-brand-500/30">
+                            Category
+                        </span>
+                        <h3 id="viewer-title" class="font-bold text-lg text-white mt-2">Media Title</h3>
+                        <p id="viewer-date" class="text-xs text-slate-400">Jan 1, 2024 • 14:30</p>
+                    </div>
+
+                    <!-- AI Classified Tags -->
+                    <div>
+                        <h4 class="text-xs font-bold uppercase text-slate-400 mb-2">Recognized AI Tags</h4>
+                        <div id="viewer-tags-container" class="flex flex-wrap gap-1.5">
+                            <!-- Tags injected -->
+                        </div>
+                    </div>
+
+                    <!-- Technical EXIF Metadata -->
+                    <div class="space-y-2 bg-slate-800/50 p-3 rounded-2xl border border-slate-800 text-xs">
+                        <div class="flex justify-between text-slate-300">
+                            <span class="text-slate-400"><i class="fa-solid fa-camera mr-1"></i> Camera:</span>
+                            <span id="viewer-exif-camera">iPhone 15 Pro</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span class="text-slate-400"><i class="fa-solid fa-expand mr-1"></i> Resolution:</span>
+                            <span id="viewer-exif-res">4032 x 3024</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span class="text-slate-400"><i class="fa-solid fa-hard-drive mr-1"></i> Size:</span>
+                            <span id="viewer-exif-size">3.4 MB</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span class="text-slate-400"><i class="fa-solid fa-location-dot mr-1"></i> GPS Location:</span>
+                            <span id="viewer-exif-location">Malibu, CA, USA</span>
+                        </div>
+                    </div>
+
+                    <!-- People Tagged -->
+                    <div id="viewer-people-section">
+                        <h4 class="text-xs font-bold uppercase text-slate-400 mb-2">People Tagged</h4>
+                        <div id="viewer-people-list" class="flex items-center gap-2">
+                            <!-- People avatars -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Media Action Buttons -->
+                <div class="pt-4 border-t border-slate-800 flex gap-2">
+                    <button onclick="shareSingleMedia()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition">
+                        <i class="fa-solid fa-share-nodes"></i> Share Link
+                    </button>
+                    <button onclick="deleteSingleMedia()" class="py-2.5 px-4 rounded-xl bg-red-950/60 hover:bg-red-900 text-red-400 text-xs font-semibold flex items-center justify-center transition">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: RENAME PERSON CLUSTER -->
+    <div id="modal-rename-person" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md hidden">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-xs w-full p-6 shadow-2xl">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">Tag Person Name</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Assign a name to automatically tag all future photos containing this face cluster.</p>
+            
+            <input 
+                type="text" 
+                id="rename-person-input" 
+                placeholder="e.g. Sarah Miller"
+                class="w-full px-4 py-2.5 text-sm bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl mb-4 focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-slate-100"
+            >
+            <div class="flex gap-2">
+                <button onclick="closeRenameModal()" class="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700">Cancel</button>
+                <button onclick="savePersonName()" class="flex-1 py-2 rounded-xl bg-brand-600 text-white text-xs font-semibold hover:bg-brand-700">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: SETTINGS & PRIVACY CONTROLS -->
+    <div id="modal-settings" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md hidden">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-brand-500"></i> Settings & Privacy
+                </h3>
+                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Local Storage Distribution -->
+                <div>
+                    <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-2">Local Storage Usage</h4>
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden flex mb-2">
+                        <div class="bg-brand-500 h-full w-[65%]" title="Photos (12.4 GB)"></div>
+                        <div class="bg-purple-500 h-full w-[20%]" title="Videos (4.1 GB)"></div>
+                        <div class="bg-emerald-500 h-full w-[5%]" title="AI Index Cache (120 MB)"></div>
+                    </div>
+                    <div class="flex justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                        <span><span class="inline-block w-2 h-2 rounded-full bg-brand-500 mr-1"></span> Photos (12.4 GB)</span>
+                        <span><span class="inline-block w-2 h-2 rounded-full bg-purple-500 mr-1"></span> Videos (4.1 GB)</span>
+                        <span><span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1"></span> AI Index (120 MB)</span>
+                    </div>
+                </div>
+
+                <!-- On-Device Privacy Toggles -->
+                <div class="space-y-3">
+                    <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100">On-Device AI Controls</h4>
+                    
+                    <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <div>
+                            <span class="text-xs font-semibold block text-slate-800 dark:text-slate-200">Local Facial Recognition</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400">Cluster faces using local neural hardware</span>
+                        </div>
+                        <input type="checkbox" checked class="w-4 h-4 accent-brand-600 rounded">
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <div>
+                            <span class="text-xs font-semibold block text-slate-800 dark:text-slate-200">EXIF GPS Map Parser</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400">Extract geo-coordinates for interactive map view</span>
+                        </div>
+                        <input type="checkbox" checked class="w-4 h-4 accent-brand-600 rounded">
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="pt-4 border-t border-slate-200 dark:border-slate-800">
+                    <button onclick="resetFacialData()" class="w-full py-2.5 rounded-xl border border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 text-xs font-semibold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-trash-can"></i> Clear All Local Face Recognition Embeddings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION BANNER -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none text-xs font-semibold">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 dark:text-emerald-600 text-base"></i>
+        <span id="toast-message">Toast Notification Message</span>
+    </div>
+
+    <!-- APPLICATION LOGIC JS -->
+    <script>
+        /* ==========================================================================
+           1. MOCK MEDIA DATASET (ENGLISH)
+           ========================================================================== */
+        let mockMedia = [
+            {
+                id: 1,
+                title: "Portrait of Sarah at Central Park",
+                url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80",
+                type: "photo",
+                category: "people",
+                people: ["Sarah Miller"],
+                location: { name: "New York City, USA", lat: 40.785091, lng: -73.968285 },
+                date: "2024-02-10 15:30",
+                quality: "good",
+                tags: ["Portrait", "Smile", "People", "Selfie"],
+                exif: { camera: "iPhone 15 Pro", res: "4032 x 3024", size: "2.8 MB" }
+            },
+            {
+                id: 2,
+                title: "Golden Retriever at Malibu Beach",
+                url: "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=800&q=80",
+                type: "photo",
+                category: "pets",
+                people: [],
+                location: { name: "Malibu Beach, CA, USA", lat: 34.0259, lng: -118.7798 },
+                date: "2023-11-14 11:15",
+                quality: "good",
+                tags: ["Dog", "Pets", "Beach", "Ocean", "Nature"],
+                exif: { camera: "Galaxy S23 Ultra", res: "4000 x 3000", size: "3.5 MB" }
+            },
+            {
+                id: 3,
+                title: "Sunset over Eiffel Tower",
+                url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80",
+                type: "photo",
+                category: "places",
+                people: [],
+                location: { name: "Paris, France", lat: 48.8584, lng: 2.2945 },
+                date: "2023-11-14 18:45",
+                quality: "good",
+                tags: ["Places", "Paris", "Eiffel Tower", "Sunset", "Travel"],
+                exif: { camera: "iPhone 14 Pro", res: "3024 x 4032", size: "4.1 MB" }
+            },
+            {
+                id: 4,
+                title: "30th Birthday Celebration Party",
+                url: "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80",
+                type: "photo",
+                category: "events",
+                people: ["Alex Johnson", "Sarah Miller"],
+                location: { name: "Los Angeles, CA, USA", lat: 34.0522, lng: -118.2437 },
+                date: "2023-09-20 21:00",
+                quality: "good",
+                tags: ["Party", "Birthday", "Events", "Cake"],
+                exif: { camera: "Sony A7 III", res: "6000 x 4000", size: "7.2 MB" }
+            },
+            {
+                id: 5,
+                title: "Artisanal Sushi Platter",
+                url: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=800&q=80",
+                type: "photo",
+                category: "food",
+                people: [],
+                location: { name: "Tokyo, Japan", lat: 35.6762, lng: 139.6503 },
+                date: "2024-01-05 20:15",
+                quality: "good",
+                tags: ["Food", "Sushi", "Japanese", "Dining"],
+                exif: { camera: "iPhone 15 Pro", res: "4032 x 3024", size: "3.1 MB" }
+            },
+            {
+                id: 6,
+                title: "Classic Sports Car Drive",
+                url: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
+                type: "photo",
+                category: "vehicles",
+                people: [],
+                location: { name: "Grand Canyon, AZ, USA", lat: 36.1069, lng: -112.1129 },
+                date: "2023-12-10 14:00",
+                quality: "good",
+                tags: ["Vehicles", "Car", "Porsche", "Roadtrip"],
+                exif: { camera: "Canon EOS R6", res: "5472 x 3648", size: "6.5 MB" }
+            },
+            {
+                id: 7,
+                title: "Tax Expense Receipt Document",
+                url: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80",
+                type: "photo",
+                category: "documents",
+                people: [],
+                location: { name: "Office, NYC, USA", lat: 40.7128, lng: -74.0060 },
+                date: "2024-02-01 09:10",
+                quality: "good",
+                tags: ["Documents", "Receipt", "Text", "Screenshot"],
+                exif: { camera: "Scanner Mobile", res: "2480 x 3508", size: "1.2 MB" }
+            },
+            {
+                id: 8,
+                title: "Funny Cat Internet Meme",
+                url: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80",
+                type: "photo",
+                category: "memes",
+                people: [],
+                location: { name: "Online Download", lat: 0, lng: 0 },
+                date: "2024-01-18 16:22",
+                quality: "good",
+                tags: ["Memes", "Cat", "Internet", "Humor"],
+                exif: { camera: "Web Download", res: "1080 x 1080", size: "450 KB" }
+            },
+            {
+                id: 9,
+                title: "Mountain Waterfall Nature Trail",
+                url: "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=800&q=80",
+                type: "photo",
+                category: "nature",
+                people: [],
+                location: { name: "Yosemite Park, CA, USA", lat: 37.8651, lng: -119.5383 },
+                date: "2023-12-12 11:40",
+                quality: "good",
+                tags: ["Nature", "Waterfall", "Forest", "Yosemite"],
+                exif: { camera: "iPhone 15 Pro", res: "4032 x 3024", size: "5.0 MB" }
+            },
+            {
+                id: 10,
+                title: "Group Selfie at Beach Resort",
+                url: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80",
+                type: "photo",
+                category: "selfies",
+                people: ["Sarah Miller", "Alex Johnson", "Emma Davis"],
+                location: { name: "Malibu Beach, CA, USA", lat: 34.0259, lng: -118.7798 },
+                date: "2023-11-13 16:50",
+                quality: "good",
+                tags: ["Selfies", "Friends", "Beach", "Sun"],
+                exif: { camera: "iPhone 14 Front", res: "3024 x 4032", size: "2.9 MB" }
+            },
+            {
+                id: 11,
+                title: "Slow-Mo Ocean Wave Video Clip",
+                url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+                type: "video",
+                duration: "00:45",
+                category: "videos",
+                people: [],
+                location: { name: "Malibu Beach, CA, USA", lat: 34.0259, lng: -118.7798 },
+                date: "2023-11-14 17:00",
+                quality: "good",
+                tags: ["Videos", "Ocean", "Slow-Mo", "Beach"],
+                exif: { camera: "GoPro Hero 11", res: "3840 x 2160 (4K)", size: "48 MB" }
+            },
+            {
+                id: 12,
+                title: "Duplicate Receipt Photo #1",
+                url: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80",
+                type: "photo",
+                category: "cleanup",
+                people: [],
+                location: { name: "Office, NYC, USA", lat: 40.7128, lng: -74.0060 },
+                date: "2024-02-01 09:11",
+                quality: "duplicate",
+                tags: ["Duplicate", "Documents"],
+                exif: { camera: "Scanner Mobile", res: "2480 x 3508", size: "1.2 MB" }
+            },
+            {
+                id: 13,
+                title: "Blurry Fast Motion Shot",
+                url: "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80",
+                type: "photo",
+                category: "cleanup",
+                people: [],
+                location: { name: "NYC, USA", lat: 40.7128, lng: -74.0060 },
+                date: "2024-01-20 22:15",
+                quality: "blurry",
+                tags: ["Blurry", "Low Quality"],
+                exif: { camera: "iPhone 12", res: "4032 x 3024", size: "3.8 MB" }
+            },
+            {
+                id: 14,
+                title: "Underexposed Dark Room Shot",
+                url: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
+                type: "photo",
+                category: "cleanup",
+                people: [],
+                location: { name: "NYC, USA", lat: 40.7128, lng: -74.0060 },
+                date: "2024-01-22 03:00",
+                quality: "dark",
+                tags: ["Dark", "Underexposed"],
+                exif: { camera: "iPhone 12", res: "4032 x 3024", size: "4.0 MB" }
+            },
+            {
+                id: 15,
+                title: "Duplicate Receipt Photo #2",
+                url: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80",
+                type: "photo",
+                category: "cleanup",
+                people: [],
+                location: { name: "Office, NYC, USA", lat: 40.7128, lng: -74.0060 },
+                date: "2024-02-01 09:12",
+                quality: "duplicate",
+                tags: ["Duplicate", "Documents"],
+                exif: { camera: "Scanner Mobile", res: "2480 x 3508", size: "1.2 MB" }
+            },
+            {
+                id: 16,
+                title: "Alex Johnson Portrait",
+                url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
+                type: "photo",
+                category: "people",
+                people: ["Alex Johnson"],
+                location: { name: "Los Angeles, CA, USA", lat: 34.0522, lng: -118.2437 },
+                date: "2023-09-20 21:30",
+                quality: "good",
+                tags: ["People", "Portrait", "Party"],
+                exif: { camera: "Sony A7 III", res: "6000 x 4000", size: "6.8 MB" }
+            }
+        ];
+
+        /* Album Categories Metadata */
+        const albumCategories = [
+            { id: "people", name: "People", icon: "fa-user-group", color: "from-blue-500 to-indigo-600" },
+            { id: "pets", name: "Pets & Animals", icon: "fa-dog", color: "from-amber-500 to-orange-600" },
+            { id: "places", name: "Places", icon: "fa-map-location-dot", color: "from-emerald-500 to-teal-600" },
+            { id: "events", name: "Events", icon: "fa-calendar-star", color: "from-purple-500 to-pink-600" },
+            { id: "food", name: "Food & Dining", icon: "fa-utensils", color: "from-red-500 to-rose-600" },
+            { id: "vehicles", name: "Vehicles", icon: "fa-car", color: "from-slate-600 to-slate-800" },
+            { id: "documents", name: "Documents", icon: "fa-file-invoice", color: "from-cyan-500 to-blue-600" },
+            { id: "memes", name: "Memes & Downloads", icon: "fa-face-laugh-squint", color: "from-yellow-400 to-amber-500" },
+            { id: "nature", name: "Nature & Landscapes", icon: "fa-tree", color: "from-green-500 to-emerald-700" },
+            { id: "selfies", name: "Selfies", icon: "fa-camera-retro", color: "from-pink-500 to-rose-500" },
+            { id: "videos", name: "Videos", icon: "fa-video", color: "from-violet-600 to-purple-800" },
+            { id: "cleanup", name: "Cleanup Suggestions", icon: "fa-broom", color: "from-amber-600 to-red-600" }
+        ];
+
+        /* Face Clusters Data */
+        let peopleList = [
+            { id: "p1", name: "Sarah Miller", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80", count: 3 },
+            { id: "p2", name: "Alex Johnson", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80", count: 2 },
+            { id: "p3", name: "Emma Davis", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80", count: 1 },
+            { id: "p4", name: "Unnamed Face Cluster #4", avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=300&q=80", count: 1 }
+        ];
+
+        /* Application Navigation State */
+        let currentTab = 'home';
+        let currentAlbumId = null;
+        let isMultiSelectMode = false;
+        let selectedMediaIds = new Set();
+        let currentViewerIndex = 0;
+        let activeMediaList = [...mockMedia];
+        let mapInstance = null;
+        let personToRenameId = null;
+
+        /* ==========================================================================
+           2. INITIALIZATION & THEME TOGGLE
+           ========================================================================== */
+        window.addEventListener('DOMContentLoaded', () => {
+            renderAlbumsGrid();
+            renderPeopleGrid();
+            renderCleanupGrid();
+            updateTotalCounters();
+            
+            // Auto open scan simulator on initial launch
+            setTimeout(() => {
+                openScanModal();
+            }, 500);
+        });
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            showToast("Appearance theme updated.");
+        }
+
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = msg;
+            if (isError) {
+                toastIcon.className = "fa-solid fa-circle-exclamation text-red-400 text-base";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400 dark:text-emerald-600 text-base";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        /* ==========================================================================
+           3. TAB NAVIGATION
+           ========================================================================== */
+        function switchTab(tabId) {
+            currentTab = tabId;
+
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-brand-500', 'text-white', 'shadow-sm');
+                btn.classList.add('text-slate-600', 'dark:text-slate-400');
+            });
+
+            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active', 'bg-brand-500', 'text-white', 'shadow-sm');
+                activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400');
+            }
+
+            const viewTarget = document.getElementById(`view-${tabId}`);
+            if (viewTarget) viewTarget.classList.remove('hidden');
+
+            if (tabId === 'places') {
+                setTimeout(initLeafletMap, 200);
+            }
+        }
+
+        /* ==========================================================================
+           4. ALBUMS GRID RENDERER
+           ========================================================================== */
+        function renderAlbumsGrid() {
+            const grid = document.getElementById('albums-grid');
+            grid.innerHTML = '';
+
+            albumCategories.forEach(cat => {
+                let itemsCount = 0;
+                let coverUrl = 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=500&q=80';
+
+                if (cat.id === 'cleanup') {
+                    const cleanItems = mockMedia.filter(m => m.category === 'cleanup');
+                    itemsCount = cleanItems.length;
+                    if (cleanItems.length > 0) coverUrl = cleanItems[0].url;
+                } else if (cat.id === 'videos') {
+                    const videos = mockMedia.filter(m => m.type === 'video');
+                    itemsCount = videos.length;
+                    if (videos.length > 0) coverUrl = videos[0].url;
+                } else {
+                    const filtered = mockMedia.filter(m => m.category === cat.id);
+                    itemsCount = filtered.length;
+                    if (filtered.length > 0) coverUrl = filtered[0].url;
+                }
+
+                const cardHtml = `
+                    <div onclick="openAlbumDetail('${cat.id}')" class="group relative bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col transform hover:-translate-y-1">
+                        <div class="h-40 w-full relative overflow-hidden bg-slate-100 dark:bg-slate-800">
+                            <img src="${coverUrl}" alt="${cat.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-xl bg-white/20 backdrop-blur-md text-white flex items-center justify-center text-xs">
+                                <i class="fa-solid ${cat.icon}"></i>
+                            </div>
+
+                            <span class="absolute top-3 right-3 text-[11px] font-bold px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md text-white border border-white/10">
+                                ${itemsCount} items
+                            </span>
+
+                            <div class="absolute bottom-3 left-3 right-3 text-white">
+                                <h3 class="font-bold text-base leading-tight drop-shadow-sm">${cat.name}</h3>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += cardHtml;
+            });
+        }
+
+        /* ==========================================================================
+           5. ALBUM DETAIL VIEW & BATCH SELECTION
+           ========================================================================== */
+        function openAlbumDetail(categoryId) {
+            currentAlbumId = categoryId;
+            const categoryObj = albumCategories.find(c => c.id === categoryId);
+
+            document.getElementById('album-detail-title').innerText = categoryObj ? categoryObj.name : "Album";
+            
+            if (categoryId === 'videos') {
+                activeMediaList = mockMedia.filter(m => m.type === 'video');
+            } else if (categoryId === 'cleanup') {
+                activeMediaList = mockMedia.filter(m => m.category === 'cleanup');
+            } else {
+                activeMediaList = mockMedia.filter(m => m.category === categoryId);
+            }
+
+            document.getElementById('album-detail-count').innerText = `${activeMediaList.length} items found`;
+            renderAlbumMediaGrid(activeMediaList);
+            switchTab('album-detail');
+        }
+
+        function renderAlbumMediaGrid(mediaItems) {
+            const grid = document.getElementById('album-media-grid');
+            grid.innerHTML = '';
+
+            if (mediaItems.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-400">
+                        <i class="fa-regular fa-image text-4xl mb-2"></i>
+                        <p class="text-sm">No items in this album yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            mediaItems.forEach((item, idx) => {
+                const isSelected = selectedMediaIds.has(item.id);
+                const itemHtml = `
+                    <div class="relative group aspect-square rounded-2xl overflow-hidden bg-slate-200 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition cursor-pointer" onclick="handleMediaClick(${idx}, ${item.id})">
+                        <img src="${item.url}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        
+                        <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+                        ${isMultiSelectMode ? `
+                            <div class="absolute top-2 left-2 z-10">
+                                <div class="w-6 h-6 rounded-lg border-2 flex items-center justify-center ${isSelected ? 'bg-brand-500 border-brand-500 text-white' : 'border-white bg-black/40'}">
+                                    ${isSelected ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${item.type === 'video' ? `
+                            <span class="absolute bottom-2 right-2 px-2 py-0.5 rounded-lg bg-black/60 backdrop-blur-md text-white text-[10px] font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-play text-[8px]"></i> ${item.duration}
+                            </span>
+                        ` : ''}
+
+                        ${item.people.length > 0 ? `
+                            <span class="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/50 backdrop-blur-md text-white text-[10px] flex items-center justify-center border border-white/20" title="${item.people.join(', ')}">
+                                <i class="fa-solid fa-user text-[9px]"></i>
+                            </span>
+                        ` : ''}
+                    </div>
+                `;
+                grid.innerHTML += itemHtml;
+            });
+        }
+
+        function toggleMultiSelectMode() {
+            isMultiSelectMode = !isMultiSelectMode;
+            selectedMediaIds.clear();
+
+            const toggleBtn = document.getElementById('multi-select-toggle');
+            const batchActions = document.getElementById('batch-actions');
+
+            if (isMultiSelectMode) {
+                toggleBtn.classList.add('bg-brand-500', 'text-white');
+                batchActions.classList.remove('hidden');
+            } else {
+                toggleBtn.classList.remove('bg-brand-500', 'text-white');
+                batchActions.classList.add('hidden');
+            }
+            renderAlbumMediaGrid(activeMediaList);
+        }
+
+        function handleMediaClick(index, mediaId) {
+            if (isMultiSelectMode) {
+                if (selectedMediaIds.has(mediaId)) {
+                    selectedMediaIds.delete(mediaId);
+                } else {
+                    selectedMediaIds.add(mediaId);
+                }
+                document.getElementById('selected-count').innerText = `${selectedMediaIds.size} selected`;
+                renderAlbumMediaGrid(activeMediaList);
+            } else {
+                openViewerModal(index);
+            }
+        }
+
+        function batchShare() {
+            if (selectedMediaIds.size === 0) return;
+            showToast(`Generated secure share link for ${selectedMediaIds.size} items!`);
+            toggleMultiSelectMode();
+        }
+
+        function batchDelete() {
+            if (selectedMediaIds.size === 0) return;
+            const count = selectedMediaIds.size;
+            mockMedia = mockMedia.filter(m => !selectedMediaIds.has(m.id));
+            activeMediaList = activeMediaList.filter(m => !selectedMediaIds.has(m.id));
+            
+            showToast(`${count} items moved to local trash.`);
+            toggleMultiSelectMode();
+            renderAlbumsGrid();
+            updateTotalCounters();
+        }
+
+        /* ==========================================================================
+           6. FULLSCREEN MEDIA LIGHTBOX & EXIF INSPECTOR
+           ========================================================================== */
+        function openViewerModal(index) {
+            currentViewerIndex = index;
+            const item = activeMediaList[index];
+            if (!item) return;
+
+            document.getElementById('viewer-img').src = item.url;
+            document.getElementById('viewer-title').innerText = item.title;
+            document.getElementById('viewer-date').innerText = item.date;
+            document.getElementById('viewer-category-tag').innerText = item.category;
+            
+            document.getElementById('viewer-exif-camera').innerText = item.exif.camera;
+            document.getElementById('viewer-exif-res').innerText = item.exif.res;
+            document.getElementById('viewer-exif-size').innerText = item.exif.size;
+            document.getElementById('viewer-exif-location').innerText = item.location.name;
+
+            const vidBadge = document.getElementById('viewer-video-badge');
+            if (item.type === 'video') vidBadge.classList.remove('hidden');
+            else vidBadge.classList.add('hidden');
+
+            const tagsContainer = document.getElementById('viewer-tags-container');
+            tagsContainer.innerHTML = '';
+            item.tags.forEach(t => {
+                tagsContainer.innerHTML += `<span class="px-2 py-1 rounded-lg bg-slate-800 text-slate-300 text-[11px] font-medium">#${t}</span>`;
+            });
+
+            const peopleContainer = document.getElementById('viewer-people-list');
+            peopleContainer.innerHTML = '';
+            if (item.people.length > 0) {
+                item.people.forEach(pName => {
+                    const personObj = peopleList.find(p => p.name === pName);
+                    const avatarSrc = personObj ? personObj.avatar : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80';
+                    peopleContainer.innerHTML += `
+                        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800 text-slate-200 text-xs">
+                            <img src="${avatarSrc}" class="w-4 h-4 rounded-full object-cover">
+                            <span>${pName}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                peopleContainer.innerHTML = `<span class="text-xs text-slate-500">No faces detected</span>`;
+            }
+
+            document.getElementById('modal-viewer').classList.remove('hidden');
+        }
+
+        function closeViewerModal() {
+            document.getElementById('modal-viewer').classList.add('hidden');
+        }
+
+        function navigateViewer(step) {
+            let nextIndex = currentViewerIndex + step;
+            if (nextIndex < 0) nextIndex = activeMediaList.length - 1;
+            if (nextIndex >= activeMediaList.length) nextIndex = 0;
+            openViewerModal(nextIndex);
+        }
+
+        function shareSingleMedia() {
+            showToast("Shareable encrypted link copied to clipboard!");
+        }
+
+        function deleteSingleMedia() {
+            const item = activeMediaList[currentViewerIndex];
+            if (!item) return;
+
+            mockMedia = mockMedia.filter(m => m.id !== item.id);
+            activeMediaList = activeMediaList.filter(m => m.id !== item.id);
+
+            closeViewerModal();
+            renderAlbumMediaGrid(activeMediaList);
+            renderAlbumsGrid();
+            updateTotalCounters();
+            showToast("Item deleted from device.");
+        }
+
+        /* ==========================================================================
+           7. FACIAL RECOGNITION (PEOPLE)
+           ========================================================================== */
+        function renderPeopleGrid() {
+            const grid = document.getElementById('people-grid');
+            grid.innerHTML = '';
+
+            peopleList.forEach(person => {
+                const cardHtml = `
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm text-center flex flex-col items-center group relative hover:shadow-lg transition">
+                        <div class="w-24 h-24 rounded-full overflow-hidden mb-3 border-2 border-brand-500/30 group-hover:border-brand-500 transition shadow-inner">
+                            <img src="${person.avatar}" alt="${person.name}" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-900 dark:text-slate-100">${person.name}</h4>
+                        <span class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${person.count} photo(s)</span>
+
+                        <button onclick="openRenameModal('${person.id}')" class="mt-3 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-brand-500 hover:text-white text-slate-700 dark:text-slate-300 text-xs font-semibold transition">
+                            <i class="fa-solid fa-pen text-[10px] mr-1"></i> Tag Name
+                        </button>
+                    </div>
+                `;
+                grid.innerHTML += cardHtml;
+            });
+        }
+
+        function openRenameModal(personId) {
+            personToRenameId = personId;
+            const person = peopleList.find(p => p.id === personId);
+            document.getElementById('rename-person-input').value = person ? person.name : '';
+            document.getElementById('modal-rename-person').classList.remove('hidden');
+        }
+
+        function closeRenameModal() {
+            document.getElementById('modal-rename-person').classList.add('hidden');
+        }
+
+        function savePersonName() {
+            const newName = document.getElementById('rename-person-input').value.trim();
+            if (!newName) return;
+
+            const person = peopleList.find(p => p.id === personToRenameId);
+            if (person) {
+                const oldName = person.name;
+                person.name = newName;
+
+                mockMedia.forEach(m => {
+                    m.people = m.people.map(p => p === oldName ? newName : p);
+                });
+
+                renderPeopleGrid();
+                closeRenameModal();
+                showToast(`Person cluster tagged as "${newName}".`);
+            }
+        }
+
+        /* ==========================================================================
+           8. INTERACTIVE PLACES MAP (LEAFLET)
+           ========================================================================== */
+        function initLeafletMap() {
+            if (mapInstance) {
+                mapInstance.invalidateSize();
+                return;
+            }
+
+            mapInstance = L.map('leaflet-map').setView([20.0, 0.0], 2);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(mapInstance);
+
+            const itemsWithGps = mockMedia.filter(m => m.location.lat !== 0);
+
+            itemsWithGps.forEach(item => {
+                const marker = L.marker([item.location.lat, item.location.lng]).addTo(mapInstance);
+                marker.bindPopup(`
+                    <div style="text-align:center; font-family:'Inter',sans-serif;">
+                        <img src="${item.url}" style="width:110px; height:75px; object-fit:cover; border-radius:8px; margin-bottom:4px;">
+                        <strong style="font-size:12px; display:block;">${item.title}</strong>
+                        <span style="font-size:10px; color:#666;">${item.location.name}</span>
+                    </div>
+                `);
+            });
+
+            renderMapPhotosGrid(itemsWithGps);
+        }
+
+        function filterMapLocation(cityName) {
+            if (!mapInstance) return;
+
+            let filtered = mockMedia.filter(m => m.location.lat !== 0);
+            if (cityName !== 'all') {
+                filtered = filtered.filter(m => m.location.name.includes(cityName));
+                if (cityName === 'Malibu') mapInstance.setView([34.0259, -118.7798], 11);
+                if (cityName === 'Paris') mapInstance.setView([48.8584, 2.2945], 12);
+                if (cityName === 'Tokyo') mapInstance.setView([35.6762, 139.6503], 11);
+            } else {
+                mapInstance.setView([20.0, 0.0], 2);
+            }
+
+            document.getElementById('map-photos-title').innerText = cityName === 'all' ? 'Geotagged Media Highlights' : `Photos in ${cityName}`;
+            renderMapPhotosGrid(filtered);
+        }
+
+        function renderMapPhotosGrid(items) {
+            const grid = document.getElementById('map-photos-grid');
+            grid.innerHTML = '';
+
+            items.forEach(item => {
+                grid.innerHTML += `
+                    <div onclick="openViewerModalFromList(${item.id})" class="aspect-square rounded-2xl overflow-hidden bg-slate-200 dark:bg-slate-800 cursor-pointer hover:opacity-90 transition shadow-sm">
+                        <img src="${item.url}" class="w-full h-full object-cover">
+                    </div>
+                `;
+            });
+        }
+
+        function openViewerModalFromList(mediaId) {
+            activeMediaList = mockMedia;
+            const idx = mockMedia.findIndex(m => m.id === mediaId);
+            if (idx !== -1) openViewerModal(idx);
+        }
+
+        /* ==========================================================================
+           9. CLEANUP & STORAGE OPTIMIZER
+           ========================================================================== */
+        function renderCleanupGrid(categoryFilter = 'all') {
+            const grid = document.getElementById('cleanup-grid');
+            grid.innerHTML = '';
+
+            let items = mockMedia.filter(m => m.category === 'cleanup');
+            if (categoryFilter !== 'all') {
+                items = items.filter(m => m.quality === categoryFilter);
+            }
+
+            if (items.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-400">
+                        <i class="fa-solid fa-circle-check text-4xl text-emerald-500 mb-2"></i>
+                        <p class="text-sm">Storage clean! No items found in this category.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            items.forEach(item => {
+                let badgeText = "Duplicate Shot";
+                let badgeColor = "bg-purple-500/20 text-purple-600 dark:text-purple-400";
+                if (item.quality === 'blurry') {
+                    badgeText = "Blurry Frame";
+                    badgeColor = "bg-amber-500/20 text-amber-600 dark:text-amber-400";
+                } else if (item.quality === 'dark') {
+                    badgeText = "Underexposed";
+                    badgeColor = "bg-red-500/20 text-red-600 dark:text-red-400";
+                }
+
+                const cardHtml = `
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                        <img src="${item.url}" class="w-20 h-20 rounded-2xl object-cover shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${badgeColor}">
+                                ${badgeText}
+                            </span>
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-slate-100 truncate mt-1">${item.title}</h4>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Size: ${item.exif.size}</p>
+                            
+                            <div class="flex gap-2 mt-3">
+                                <button onclick="keepCleanItem(${item.id})" class="px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-semibold transition">
+                                    Keep
+                                </button>
+                                <button onclick="deleteCleanItem(${item.id})" class="px-3 py-1 rounded-xl bg-red-600 text-white text-[11px] font-semibold hover:bg-red-700 transition">
+                                    Clean
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += cardHtml;
+            });
+        }
+
+        function filterCleanupCategory(cat) {
+            document.querySelectorAll('.clean-tab').forEach(b => {
+                b.classList.remove('bg-brand-500', 'text-white');
+                b.classList.add('text-slate-600', 'dark:text-slate-400');
+            });
+            const activeBtn = document.getElementById(`clean-tab-${cat}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-brand-500', 'text-white');
+                activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400');
+            }
+            renderCleanupGrid(cat);
+        }
+
+        function deleteCleanItem(id) {
+            mockMedia = mockMedia.filter(m => m.id !== id);
+            renderCleanupGrid();
+            renderAlbumsGrid();
+            updateTotalCounters();
+            showToast("Item cleaned. Storage space recovered!");
+        }
+
+        function keepCleanItem(id) {
+            const item = mockMedia.find(m => m.id === id);
+            if (item) item.category = 'documents';
+            renderCleanupGrid();
+            renderAlbumsGrid();
+            updateTotalCounters();
+            showToast("Item kept and moved to Documents album.");
+        }
+
+        /* ==========================================================================
+           10. NATURAL LANGUAGE SEARCH
+           ========================================================================== */
+        function handleSearch(query) {
+            const clearBtn = document.getElementById('clear-search-btn');
+            const searchInfo = document.getElementById('search-info');
+            const searchQueryText = document.getElementById('search-query-text');
+
+            if (!query.trim()) {
+                clearSearch();
+                return;
+            }
+
+            if (clearBtn) clearBtn.classList.remove('hidden');
+            searchInfo.classList.remove('hidden');
+            searchQueryText.innerText = `"${query}"`;
+
+            const cleanQuery = query.toLowerCase().trim();
+
+            const filtered = mockMedia.filter(m => {
+                const matchTitle = m.title.toLowerCase().includes(cleanQuery);
+                const matchCategory = m.category.toLowerCase().includes(cleanQuery);
+                const matchLocation = m.location.name.toLowerCase().includes(cleanQuery);
+                const matchPeople = m.people.some(p => p.toLowerCase().includes(cleanQuery));
+                const matchTags = m.tags.some(t => t.toLowerCase().includes(cleanQuery));
+
+                return matchTitle || matchCategory || matchLocation || matchPeople || matchTags;
+            });
+
+            activeMediaList = filtered;
+            document.getElementById('album-detail-title').innerText = `Search: "${query}"`;
+            document.getElementById('album-detail-count').innerText = `${filtered.length} items matched`;
+            renderAlbumMediaGrid(filtered);
+            switchTab('album-detail');
+        }
+
+        function clearSearch() {
+            document.getElementById('global-search').value = '';
+            document.getElementById('global-search-mobile').value = '';
+            const clearBtn = document.getElementById('clear-search-btn');
+            if (clearBtn) clearBtn.classList.add('hidden');
+            document.getElementById('search-info').classList.add('hidden');
+            switchTab('home');
+        }
+
+        /* ==========================================================================
+           11. MODAL SIMULATION & HELPERS
+           ========================================================================== */
+        function openScanModal() {
+            document.getElementById('modal-scan').classList.remove('hidden');
+            let progress = 0;
+            const progressBar = document.getElementById('scan-progress-bar');
+            const percentageText = document.getElementById('scan-percentage');
+            const itemsText = document.getElementById('scan-items-count');
+            const statusText = document.getElementById('scan-status-text');
+
+            const stages = [
+                "Reading EXIF metadata...",
+                "Extracting Face Embeddings with ML Kit...",
+                "Grouping GPS locations & places...",
+                "Detecting low quality & duplicates...",
+                "Gallery 100% Organized!"
+            ];
+
+            const interval = setInterval(() => {
+                progress += 5;
+                if (progress > 100) progress = 100;
+
+                progressBar.style.width = `${progress}%`;
+                percentageText.innerText = `${progress}%`;
+                itemsText.innerText = `${Math.floor((progress/100) * mockMedia.length)} of ${mockMedia.length} media items processed`;
+
+                const stageIdx = Math.min(Math.floor((progress / 100) * stages.length), stages.length - 1);
+                statusText.innerText = stages[stageIdx];
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        closeScanModal();
+                        showToast("On-Device AI gallery scan completed!");
+                    }, 800);
+                }
+            }, 70);
+        }
+
+        function closeScanModal() {
+            document.getElementById('modal-scan').classList.add('hidden');
+        }
+
+        function openSettingsModal() {
+            document.getElementById('modal-settings').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('modal-settings').classList.add('hidden');
+        }
+
+        function resetFacialData() {
+            peopleList = [];
+            renderPeopleGrid();
+            closeSettingsModal();
+            showToast("All facial recognition embeddings erased.", true);
+        }
+
+        function createSuggestedAlbum() {
+            showToast("New smart album 'Weekend Beach Trip to Malibu' created!");
+        }
+
+        function updateTotalCounters() {
+            const total = mockMedia.length;
+            const counterEl = document.getElementById('total-items-counter');
+            if (counterEl) counterEl.innerText = `${total} items analyzed`;
+            
+            const cleanCount = mockMedia.filter(m => m.category === 'cleanup').length;
+            const badge = document.getElementById('cleanup-badge');
+            if (badge) badge.innerText = cleanCount;
+        }
+    </script>
+</body>
+</html>
